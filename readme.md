@@ -18,6 +18,75 @@
 	- buffered vs unbuffered output
 	- use int keys instead of string keys
 
+## sync.Pools
+```
+// 1_test.go
+package main
+
+import (
+	"bytes"
+	"testing"
+)
+
+func Benchmark_f1(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		f1()
+	}
+}
+
+func f1() {
+	s := &bytes.Buffer{}
+	s.Write([]byte("dirty"))
+
+	return
+}
+
+```
+
+```
+$ go test -bench=f1 -benchmem
+Benchmark_f1-8   	30000000	        43.5 ns/op	      64 B/op	       1 allocs/op
+```
+
+```
+package main
+
+import (
+	"bytes"
+	"sync"
+	"testing"
+)
+
+var pool2 = sync.Pool{
+	New: func() interface{} {
+		return &bytes.Buffer{}
+	},
+}
+
+func Benchmark_f2(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		f2()
+	}
+}
+
+func f2() {
+	// When getting from a Pool, you need to cast
+	s := pool2.Get().(*bytes.Buffer)
+	// We write to the object
+	s.Write([]byte("dirty"))
+	// Then put it back
+	pool2.Put(s)
+
+	return
+}
+
+```
+
+```
+$ go test -bench=f2 -benchmem
+Benchmark_f2-8   	50000000	        38.2 ns/op	      14 B/op	       0 allocs/op
+```
+
 #References
 * (https://www.dotconferences.com/2019/03/daniel-marti-optimizing-go-code-without-a-blindfold)[Daniel Marti's talk - Optimizing Go Code without a Blindfold]
 * (https://dave.cheney.net/high-performance-go-workshop/dotgo-paris.html)[dave cheney high performance workshop]
@@ -105,3 +174,4 @@
 * https://pusher.com/sessions/meetup/the-realtime-guild/golangs-realtime-garbage-collector
 * https://blog.cloudflare.com/go-dont-collect-my-garbage/
 * https://syslog.ravelin.com/further-dangers-of-large-heaps-in-go-7a267b57d487
+* https://www.akshaydeo.com/blog/2017/12/23/How-did-I-improve-latency-by-700-percent-using-syncPool/
