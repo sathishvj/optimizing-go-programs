@@ -19,6 +19,18 @@
 	- use int keys instead of string keys
 
 ## sync.Pools
+Pool's purpose is to cache allocated but unused items for later reuse, relieving pressure on the garbage collector. That is, it makes it easy to build efficient, thread-safe free lists. However, it is not suitable for all free lists.
+
+A Pool is a set of temporary objects that may be individually saved and retrieved.
+
+Any item stored in the Pool may be removed automatically at any time without notification. If the Pool holds the only reference when this happens, the item might be deallocated.
+
+A Pool is safe for use by multiple goroutines simultaneously.
+
+An appropriate use of a Pool is to manage a group of temporary items silently shared among and potentially reused by concurrent independent clients of a package. Pool provides a way to amortize allocation overhead across many clients.
+
+An example of good use of a Pool is in the fmt package, which maintains a dynamically-sized store of temporary output buffers. The store scales under load (when many goroutines are actively printing) and shrinks when quiescent.
+
 ```
 // 1_test.go
 package main
@@ -49,6 +61,7 @@ Benchmark_f1-8   	30000000	        43.5 ns/op	      64 B/op	       1 allocs/op
 ```
 
 ```
+// 2_test.go
 package main
 
 import (
@@ -86,6 +99,10 @@ func f2() {
 $ go test -bench=f2 -benchmem
 Benchmark_f2-8   	50000000	        38.2 ns/op	      14 B/op	       0 allocs/op
 ```
+
+### Exercise: sync.Pool
+A type of data (book) needs to be written to a json file. An ISBN number is added to new book ({title, author}) and written out to a file.  Use sync.Pool to reduce allocations prior to writing.
+See book1_test.go and book2_test.go
 
 #References
 * (https://www.dotconferences.com/2019/03/daniel-marti-optimizing-go-code-without-a-blindfold)[Daniel Marti's talk - Optimizing Go Code without a Blindfold]
