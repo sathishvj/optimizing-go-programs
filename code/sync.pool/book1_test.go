@@ -1,3 +1,9 @@
+// run: go test -bench=write1 -benchmem
+// vs
+// go test -bench=write2 -benchmem
+
+// study: difference in allocations and speed between the versions
+// expected: the one with sync.Pool should have lesser allocations.
 package main
 
 import (
