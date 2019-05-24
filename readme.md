@@ -286,7 +286,9 @@ Discussion: for a program to be more efficient should you have more threads/goro
 Discussion: goroutines are kinda sorta similar to threads.  So why don't we just use threads instead of goroutines?
 
 Threads typically take up more resources than goroutines - a minimum thread stack typically is upwards of 1MB.
-A goroutine typically starts of at 2kh.  So, that's, at a vvery minimum, a reduction of 500x.  Anything else though?
+A goroutine typically starts of at 2kh.  So, that's, at a very minimum, a reduction of 500x.  Anything else though?
+
+Context switching in Linux is about 1000ns while in go it is about 200ns - https://eli.thegreenplace.net/2018/measuring-context-switching-and-memory-overheads-for-linux-threads/
 
 A primary cost factor is contention.  Programs that has parallelism does not necessarily have higher performance because of greater contention for resources.
 
