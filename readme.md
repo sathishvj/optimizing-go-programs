@@ -419,6 +419,7 @@ The stack frame generally includes the following components:
  The Stack
  ---------
 
+```
 |      f()      |
 |               |
 +---------------+
@@ -431,9 +432,11 @@ The stack frame generally includes the following components:
 |  }            |  /
 +---------------+
 ================= // invalid below this
+```
 
 As the function call returns, the stack unwinds leaving previous stack frames invalid.
 
+```
 |      f()      |
 |               |
 +---------------+
@@ -446,6 +449,7 @@ As the function call returns, the stack unwinds leaving previous stack frames in
 |     a := 10   |   } Stack frame of called function: g()
 |               |  /
 +---------------+
+```
 
 All local variables are no more accessible.  In C this would cause a segmentation fault.
 
