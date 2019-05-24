@@ -1,18 +1,19 @@
 ## Contents
-* Testing and Benchmarking
-* go tool pprof
-* go tool trace
+* (#testing)[Testing]
+* (#benchmarking)[Benchmarking]
+* (#profiling)[Profiling]
+* (#tracing)[Tracing]
 	- how to read the views
 	- tagging sections
 * environment variables
-	- (#GOMAXPROCS)[GOMAXPROCS]
-	- (#GOGC)[GOGC]
+	- (#gomaxprocs)[GOMAXPROCS]
+	- (#gogc)[GOGC]
 * go memory analysis
-	- (#Stack-and-Heap)[stack and heap]
-	- (#Escape-Analysis)[escape analysis]
+	- (#stack-and-heap)[stack and heap]
+	- (#escape-analysis)[escape analysis]
 * concurrency
-	- (#sync.Pools)[sync Pools]
-	- (#sync.Once-for-Lazy-Initialization)[sync once and lazy initializations]
+	- (#sync-pools)[sync Pools]
+	- (#sync-once-for-lazy-initialization)[sync once and lazy initializations]
 * go slices
 	- how do slices work internally. allocation and reuse.
 * specific optimizations
