@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e384564d-110a-4bf3-81a5-c4db639dd051" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/code/gomaxprocs/mergesort.go" beforeDir="false" afterPath="$PROJECT_DIR$/code/gomaxprocs/mergesort.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/readme.md" beforeDir="false" afterPath="$PROJECT_DIR$/readme.md" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/.tmp/" />
@@ -28,8 +29,8 @@
         <entry file="file://$PROJECT_DIR$/readme.md">
           <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
             <state split_layout="SPLIT">
-              <first_editor relative-caret-position="-3090">
-                <caret line="33" column="52" selection-start-line="33" selection-start-column="52" selection-end-line="33" selection-end-column="52" />
+              <first_editor relative-caret-position="3810">
+                <caret line="600" column="52" selection-start-line="600" selection-start-column="52" selection-end-line="600" selection-end-column="52" />
               </first_editor>
               <second_editor />
             </state>
@@ -256,8 +257,8 @@
     <entry file="file://$PROJECT_DIR$/readme.md">
       <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
         <state split_layout="SPLIT">
-          <first_editor relative-caret-position="-3090">
-            <caret line="33" column="52" selection-start-line="33" selection-start-column="52" selection-end-line="33" selection-end-column="52" />
+          <first_editor relative-caret-position="3810">
+            <caret line="600" column="52" selection-start-line="600" selection-start-column="52" selection-end-line="600" selection-end-column="52" />
           </first_editor>
           <second_editor />
         </state>
