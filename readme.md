@@ -451,7 +451,7 @@ As the function call returns, the stack unwinds leaving previous stack frames in
 +---------------+
 ```
 
-All local variables are no more accessible.  In C this would cause a segmentation fault.
+All local variables are no more accessible.  In C, returning a pointer to a local variable would cause a segmentation fault.
 
 ```
 // online c editor - https://onlinegdb.com/HySykSJoE
