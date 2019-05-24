@@ -4,6 +4,7 @@
 
 package main
 
+/*
 func f() {
 	var i = 5
 	i++
@@ -15,6 +16,7 @@ func f_returns() int {
 	i++
 	return i
 }
+*/
 
 func f_returns_ptr() *int {
 	var i = 5
@@ -23,7 +25,7 @@ func f_returns_ptr() *int {
 }
 
 func main() {
-	f()
-	f_returns()
+	//f()
+	//f_returns()
 	f_returns_ptr()
 }

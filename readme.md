@@ -4,27 +4,495 @@
 * go tool trace
 	- how to read the views
 	- tagging sections
+* environment variables
+	- (#GOMAXPROCS)[GOMAXPROCS]
+	- (#GOGC)[GOGC]
 * go memory analysis
-	- stack and heap
-	- escape analysis
+	- (#Stack-and-Heap)[stack and heap]
+	- (#Escape-Analysis)[escape analysis]
+* concurrency
+	- (#sync.Pools)[sync Pools]
+	- (#sync.Once-for-Lazy-Initialization)[sync once and lazy initializations]
 * go slices
 	- how do slices work internally. allocation and reuse.
-* concurrency
-	- (#)[sync pools]
-	- sync once and lazy initializations
 * specific optimizations
 	- string vs buffer
 	- heavy work in mutexes (https://commandercoriander.net/blog/2018/04/10/dont-lock-around-io/)
 	- buffered vs unbuffered output
 	- use int keys instead of string keys
 
+* Performance Tuning Patterns
+
 ## Testing
+
+Unit testing is important enough to be a standard library.
+
+```code/testing```
+
+```
+func BeginsWith(s, pat string) bool {
+	return strings.HasPrefix(s, pat)
+}
+
+func Test_BeginsWith(t *testing.T) {
+	tc := []struct {
+		s, pat string
+		exp    bool
+	}{
+		{"GoLang", "Go", true},
+		{"GoLang", "Java", false},
+		{"GoLang is awesome", "awe", false},
+		{"awesome is GoLang. - Yoda", "awe", true},
+	}
+
+	for _, tt := range tc {
+		if BeginsWith(tt.s, tt.pat) != tt.exp {
+			t.Fail()
+		}
+	}
+}
+```
+
+```
+$ go test -v
+=== RUN   Test_BeginsWith
+--- PASS: Test_BeginsWith (0.00s)
+PASS
+```
+
+Testing validates your code.  It checks for correctness.
+
+```Opt tip: unit testing first, always.```
+
+p.s. When you run benchmarks, tests are run first.
 
 ## Benchmarking
 
+Benchmarking checks for optimization.
+
+```code/testing```
+
+```
+func Benchmark_BeginsWith(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		BeginsWith("GoLang", "Go")
+	}
+}
+```
+
+```
+$ go test -v -bench=. -benchmem
+=== RUN   Test_BeginsWith
+--- PASS: Test_BeginsWith (0.00s)
+goos: darwin
+goarch: amd64
+Benchmark_BeginsWith-8   	500000000	         3.69 ns/op	       0 B/op	       0 allocs/op
+PASS
+```
+
+Benchmarking functions don't always care about the result (that is checked by unit testing).  However, the speed/allocations/blocking of a function could be dependent on the inputs - so test different inputs. 
+
+## Coverage
+
+The Go tooling also gives you automatic coverage results.  Less code is faster code.  Tested and covered code is more reliable code.
+
+```code/cover```
+
+```
+go test -covermode=count -coverprofile=count.out fmt
+go tool cover -html=count.out
+```
+
+For current folder:
+```
+go test -covermode=count -coverprofile=count.out
+go tool cover -html=count.out
+```
+
+
 ## Profiling
 
+Package pprof writes runtime profiling data in the format expected by the pprof visualization tool.
+
+The first step to profiling a Go program is to enable profiling. Support for profiling benchmarks built with the standard testing package is built into go test.
+
+```
+func isGopher(email string) (string, bool) {
+	re := regexp.MustCompile("^([[:alpha:]]+)@golang.org$")
+	match := re.FindStringSubmatch(email)
+	if len(match) == 2 {
+		return match[1], true
+	}
+	return "", false
+}
+
+func Benchmark_isGopher(b *testing.B) {
+
+	tcs := []struct {
+		in    string
+		exp   bool
+		expId string
+	}{
+		{
+			"a@golang.org",
+			true,
+			"a",
+		},
+	}
+
+	for i := 0; i < b.N; i++ {
+		isGopher(tcs[0].in)
+	}
+}
+```
+
+```
+go test -bench=. -cpuprofile=cpu.pprof
+
+go tool pprof cpu.pprof
+
+go-torch --binaryname web.test -b cpu.pprof
+```
+
+More recently (1.10?), pprof got its own UI.
+
+```
+$ go get github.com/google/pprof
+```
+
+The tool launches a web UI if -http flag is provided. For example, in order to launch the UI with an existing profile data, run the following command:
+
+
+```
+pprof -http=:8080 cpu.pprof
+```
+
+There is also a standard HTTP interface to profiling data. Adding the following line will install handlers under the /debug/pprof/ URL to download live profiles:
+
+```
+import _ "net/http/pprof"
+See the net/http/pprof package for more details.
+```
+
 ## Tracing
+
+https://blog.gopheracademy.com/advent-2017/go-execution-tracer/
+
+Ever wondered how are your goroutines being scheduled by the go runtime? Ever tried to understand why adding concurrency to your program has not given it better performance? The go execution tracer can help answer these and other questions to help you diagnose performance issues, e.g, latency, contention and poor parallelization.
+
+Data is collected by the tracer without any kind of aggregation or sampling. In some busy applications this may result in a large file.
+
+While the CPU profiler does a nice job to telling you what function is spending most CPU time, it does not help you figure out what is preventing a goroutine from running or how are the goroutines being scheduled on the available OS threads. That’s precisely where the tracer really shines.
+
+## GOMAXPROCS
+Discussion: for a program to be more efficient should you have more threads/goroutines or less?
+Discussion: goroutines are kinda sorta similar to threads.  So why don't we just use threads instead of goroutines?
+
+Threads typically take up more resources than goroutines - a minimum thread stack typically is upwards of 1MB.
+A goroutine typically starts of at 2kh.  So, that's, at a vvery minimum, a reduction of 500x.  Anything else though?
+
+A primary cost factor is contention.  Programs that has parallelism does not necessarily have higher performance because of greater contention for resources.
+
+### What is GOMAXPROCS?
+The GOMAXPROCS setting controls how many operating systems threads attempt to execute code simultaneously.  For example, if GOMAXPROCS is 4, then the program will only execute code on 4 operating system threads at once, even if there are 1000 goroutines. The limit does not count threads blocked in system calls such as I/O.
+
+GOMAXPROCS can be set explicitly using the GOMAXPROCS environment variable or by calling runtime.GOMAXPROCS from within a program.
+
+```code/gomaxprocs```
+
+```
+func main() {
+	fmt.Println("runtime.NumCPU()=", runtime.NumCPU())
+}
+```
+
+On my quad-core CPU it prints:
+```
+runtime.NumCPU()= 8
+```
+
+Why is it showing 8 for NumCPU for a quad-core machine? The Intel chips on my machine is hyperthreaded - for each processor core that is physically present, the operating system addresses two virtual (logical) cores and shares the workload between them when possible.
+
+### What should be the value of GOMAXPROCS?
+Upto Go 1.4, GOMAXPROCS defaulted to 1 because the 
+
+The default setting of GOMAXPROCS in all Go releases [up to 1.4] is 1, because programs with frequent goroutine switches ran much slower when using multiple threads. It is much cheaper to switch between two goroutines in the same thread than to switch between two goroutines in different threads.
+
+Goroutine scheduling affinity and other improvements to the scheduler have largely addressed the problem, by keeping goroutines that are concurrent but not parallel in the same thread.
+
+For Go 1.5, the default setting of GOMAXPROCS to the number of CPUs available, as determined by runtime.NumCPU.
+
+### Running with different GOMAXPROCS
+
+```
+GOMAXPROCS=1 go run mergesort.go v1 & go tool trace v1.trace
+```
+
+![GOMAXPROCS=1](./images/gomaxprocs/gomaxprocs-1.png)
+
+```
+GOMAXPROCS=8 go run mergesort.go v1 & go tool trace v1.trace
+```
+
+![GOMAXPROCS=8](./images/gomaxprocs/gomaxprocs-8.png)
+
+```
+GOMAXPROCS=18 go run mergesort.go v1 & go tool trace v1.trace
+```
+
+![GOMAXPROCS=18](./images/gomaxprocs/gomaxprocs-18.png)
+
+The number is the max possible and it is not required that the Go runtime create as many logical processors as you have specified.  
+
+### Exercise
+```gocode/gomaxprocs```
+
+Run the following and see the differences in the trace.
+
+```
+GOMAXPROCS=1 go run mergesort.go v2 && go tool trace v2.trace
+GOMAXPROCS=8 go run mergesort.go v2 && go tool trace v2.trace
+GOMAXPROCS=18 go run mergesort.go v2 && go tool trace v2.trace
+
+GOMAXPROCS=1 go run mergesort.go v3 && go tool trace v3.trace
+GOMAXPROCS=8 go run mergesort.go v3 && go tool trace v3.trace
+GOMAXPROCS=18 go run mergesort.go v3 && go tool trace v3.trace
+```
+
+```Opt Tip: Do not assume that increasing the number of GOMAXPROCS always improves speed.```
+
+## GOGC
+
+The GOGC variable sets the initial garbage collection target percentage. A collection is triggered when the ratio of freshly allocated data to live data remaining after the previous collection reaches this percentage. The default is GOGC=100. Setting GOGC=off disables the garbage collector entirely. The runtime/debug package's SetGCPercent function allows changing this percentage at run time. 
+
+GOGC controls the aggressiveness of the garbage collector.
+
+Setting this value higher, say GOGC=200, will delay the start of a garbage collection cycle until the live heap has grown to 200% of the previous size. Setting the value lower, say GOGC=20 will cause the garbage collector to be triggered more often as less new data can be allocated on the heap before triggering a collection.
+
+With the introduction of the low latency collector in Go 1.5, phrases like “trigger a garbage collection cycle” become more fluid, but the underlying message that values of GOGC greater than 100 mean the garbage collector will run less often, and for values of GOGC less than 100, more often
+
+
+### Exercise
+```gocode/gogc```
+
+Run the following and see the differences in the trace for heap and GC.
+
+```
+GOGC=off go run mergesort.go v1 & go tool trace v1.trace
+GOGC=50 go run mergesort.go v1 & go tool trace v1.trace
+GOGC=100 go run mergesort.go v1 & go tool trace v1.trace
+GOGC=200 go run mergesort.go v1 & go tool trace v1.trace
+```
+
+GOGC=off
+![GOGC=off](./images/gogc/gogc-off.png)
+
+GOGC=50
+![GOGC=50](./images/gogc/gogc-50.png)
+
+GOGC=100
+![GOGC=100](./images/gogc/gogc-100.png)
+
+GOGC=200
+![GOGC=200](./images/gogc/gogc-200.png)
+
+```Opt Tip: This helps you analyze your GC patterns but I can't find any posts that recommend this as a good performance tuning strategy.```
+
+
+## Stack and Heap
+
+Discussion: where is the stack memory shown in a trace diagram? 
+
+ref: https://scvalex.net/posts/29/
+
+### Stack Frame
+ref: http://www.cs.uwm.edu/classes/cs315/Bacon/Lecture/HTML/ch10s07.html
+
+The stack frame, also known as activation record is the collection of all data on the stack associated with one subprogram call.
+
+The stack frame generally includes the following components:
+
+* The return address
+* Argument variables passed on the stack
+* Local variables (in HLLs)
+* Saved copies of any registers modified by the subprogram that need to be restored
+
+ The Stack
+ ---------
+
+|      f()      |
+|               |
++---------------+
+|  func f(){    |  \
+|       g()     |   } Stack frame of calling function f()
+|  }            |  /
++---------------+
+|  func g() {   |  \
+|     a := 10   |   } Stack frame of called function: g()
+|  }            |  /
++---------------+
+================= // invalid below this
+
+As the function call returns, the stack unwinds leaving previous stack frames invalid.
+
+|      f()      |
+|               |
++---------------+
+|  func f(){    |  \
+|       g()     |   } Stack frame of calling function f()
+|  }            |  /
++---------------+
+================= // invalid below this
+|  func g() {   |  \
+|     a := 10   |   } Stack frame of called function: g()
+|               |  /
++---------------+
+
+All local variables are no more accessible.  In C this would cause a segmentation fault.
+
+```
+// online c editor - https://onlinegdb.com/HySykSJoE
+
+#include <stdio.h>
+
+int* f() {
+    int a;
+    a = 10;
+    return &a;
+}
+
+void main()
+{
+    int* p = f();
+    printf("p is: %x\n", p);   // p is 0
+    printf("*p is: %d\n", *p); // segmentation fault
+
+	// 
+}
+```
+
+## Escape Analysis
+
+In C, returning the reference of a local variable causes a segfault because that memory is no more valid.
+
+```
+// online c editor - https://onlinegdb.com/HySykSJoE
+
+#include <stdio.h>
+
+int* f() {
+    int a;
+    a = 10;
+    return &a;
+}
+
+void main()
+{
+    int* p = f();
+    printf("p is: %x\n", p);   // p is 0
+    printf("*p is: %d\n", *p); // segmentation fault
+
+	//
+}
+```
+
+In Go, it is allowed to return the reference of a local variable.  
+
+```
+package main
+
+import (
+	"fmt"
+)
+
+func f() *int {
+	x := 10
+	return &x
+}
+
+func main() {
+	fmt.Println(*f()) // prints 10
+}
+```
+
+How is that possible?
+
+From Effective Go: "Note that, unlike in C, it’s perfectly OK to return the address of a local variable; the storage associated with the variable survives after the function returns."
+
+"When possible, the Go compilers will allocate variables that are local to a function in that function’s stack frame. However, if the compiler cannot prove that the variable is not referenced after the function returns, then the compiler must allocate the variable on the garbage-collected heap to avoid dangling pointer errors. In the current compilers, if a variable has its address taken, that variable is a candidate for allocation on the heap. However, a basic escape analysis recognizes some cases when such variables will not live past the return from the function and can reside on the stack."
+
+*Can we figure out when variables escape to the heap?*
+
+```
+// go build -gcflags='-m' 1.go
+// go build -gcflags='-m -l' 1.go to avoid inlining
+// go build -gcflags='-m -l -m' 1.go for verbose comments.
+```
+
+```
+func f() {
+	var i = 5
+	i++
+	_ = i
+}
+
+func main() {
+	f()
+}
+```
+
+```
+$ go build -gcflags='-m -l -m' 1.go
+```
+
+```
+func f_returns() int {
+	var i = 5
+	i++
+	return i
+}
+
+func main() {
+	f_returns()
+}
+```
+
+```
+$ go build -gcflags='-m -l -m' 1.go
+```
+
+```
+func f_returns_ptr() *int {
+	var i = 5
+	i++
+	return &i
+}
+
+func main() {
+	f_returns_ptr()
+}
+```
+
+```
+$ go build -gcflags='-m -l -m' 1.go
+# command-line-arguments
+./1.go:24:9: &i escapes to heap
+./1.go:24:9: 	from ~r0 (return) at ./1.go:24:2
+./1.go:22:6: moved to heap:
+```
+
+Once the variable is on the heap, there is pressure on the Garbage Collector.
+
+Garbage collection is a convenient feature of Go - automatic memory management makes code cleaner and memory leaks less likely. However, GC also adds overhead as the program periodically needs to stop and collect unused objects. The Go compiler is smart enough to automatically decide whether a variable should be allocated on the heap, where it will later need to be garbage collected, or whether it can be allocated as part of the stack frame of the function which declared it. Stack-allocated variables, unlike heap-allocated variables, don’t incur any GC overhead because they’re destroyed when the rest of the stack frame is destroyed - when the function returns.
+
+To perform escape analysis, Go builds a graph of function calls at compile time, and traces the flow of input arguments and return values.
+
+However, if there are variables to be shared, it is appropriate for it to be on the heap.
+
+```Opt tip: If you’ve profiled your program’s heap usage and need to reduce GC time, there may be some wins from moving frequently allocated variables off the heap. ```
+
+See: https://segment.com/blog/allocation-efficiency-in-high-performance-go-services/
+See: http://www.agardner.me/golang/garbage/collection/gc/escape/analysis/2015/10/18/go-escape-analysis.html
 
 ## sync.Pools
 Pool's purpose is to cache allocated but unused items for later reuse, relieving pressure on the garbage collector. That is, it makes it easy to build efficient, thread-safe free lists. However, it is not suitable for all free lists.
@@ -220,119 +688,45 @@ sys	0m0.209s
 
 ```Opt tip: Consider lazily loading your resources using sync.Once at time of first use.```
 
-## GOMAXPROCS
-Discussion: for a program to be more efficient should you have more threads/goroutines or less?
-Discussion: goroutines are kinda sorta similar to threads.  So why don't we just use threads instead of goroutines?
+## Go Performance Patterns
+When application performance is a critical requirement, the use of built-in or third-party packages and methods should be considered carefully. The cases when a compiler can optimize code automatically are limited. The Go Performance Patterns are benchmark- and practice-based recommendations for choosing the most efficient package, method or implementation technique.
 
-Threads typically take up more resources than goroutines - a minimum thread stack typically is upwards of 1MB.
-A goroutine typically starts of at 2kh.  So, that's, at a vvery minimum, a reduction of 500x.  Anything else though?
+Some points may not be applicable to a particular program; the actual performance optimization benefits depend almost entirely on the application logic and load.
 
-A primary cost factor is contention.  Programs that has parallelism does not necessarily have higher performance because of greater contention for resources.
+### Parallelize CPU work
+When the work can be parallelized without too much synchronization, taking advantage of all available cores can speed up execution linearly to the number of physical cores.
 
-### What is GOMAXPROCS?
-The GOMAXPROCS setting controls how many operating systems threads attempt to execute code simultaneously.  For example, if GOMAXPROCS is 4, then the program will only execute code on 4 operating system threads at once, even if there are 1000 goroutines. The limit does not count threads blocked in system calls such as I/O.
+### Make multiple I/O operations asynchronous
+Network and file I/O (e.g. a database query) is the most common bottleneck in I/O-bound applications. Making independent I/O operations asynchronous, i.e. running in parallel, can improve downstream latency. Use sync.WaitGroup to synchronize multiple operations.
 
-GOMAXPROCS can be set explicitly using the GOMAXPROCS environment variable or by calling runtime.GOMAXPROCS from within a program.
+### Avoid memory allocation in hot code
+Object creation not only requires additional CPU cycles, but will also keep the garbage collector busy. It is a good practice to reuse objects whenever possible, especially in program hot spots. You can use sync.Pool for convenience. See also: Object Creation Benchmark
 
-```code/gomaxprocs```
+### Favor lock-free algorithms
+Synchronization often leads to contention and race conditions. Avoiding mutexes whenever possible will have a positive impact on efficiency as well as latency. Lock-free alternatives to some common data structures are available (e.g. Circular buffers).
 
-```
-func main() {
-	fmt.Println("runtime.NumCPU()=", runtime.NumCPU())
-}
-```
+### Use read-only locks
+The use of full locks for read-heavy synchronized variables will unnecessarily make reading goroutines wait. Use read-only locks to avoid it.
 
-On my quad-core CPU it prints:
-```
-runtime.NumCPU()= 8
-```
+### Use buffered I/O
+Disks operate in blocks of data. Accessing disk for every byte is inefficient; reading and writing bigger chunks of data greatly improves the speed. See also: File I/O Benchmark
 
-Why is it showing 8 for NumCPU for a quad-core machine? The Intel chips on my machine is hyperthreaded - for each processor core that is physically present, the operating system addresses two virtual (logical) cores and shares the workload between them when possible.
+### Use StringBuffer or StringBuilder instead of += operator
+A new string is allocated on every assignment, which is inefficient and should be avoided. See also: String Concatenation Benchmark.
 
-### What should be the value of GOMAXPROCS?
-Upto Go 1.4, GOMAXPROCS defaulted to 1 because the 
+### Use compiled regular expressions for repeated matching
+It is inefficient to compile the same regular expression before every matching. While obvious, it is often overlooked. See also: Regexp Benchmark.
 
-The default setting of GOMAXPROCS in all Go releases [up to 1.4] is 1, because programs with frequent goroutine switches ran much slower when using multiple threads. It is much cheaper to switch between two goroutines in the same thread than to switch between two goroutines in different threads.
+### Preallocate slices
+Go manages dynamically growing slices intelligently; it allocates twice as much memory every time the current capacity is reached. During re-allocation, the underlying array is copied to a new location. To avoid copying the memory and occupying garbage collection, preallocate the slice fully whenever possible. See also: Slice Appending Benchmark.
 
-Goroutine scheduling affinity and other improvements to the scheduler have largely addressed the problem, by keeping goroutines that are concurrent but not parallel in the same thread.
+### Use Protocol Buffers or MessagePack instead of JSON and Gob
+JSON and Gob use reflection, which is relatively slow due to the amount of work it does. Although Gob serialization and deserialization is comparably fast, though, and may be preferred as it does not require type generation. See also: Serialization Benchmark.
 
-For Go 1.5, the default setting of GOMAXPROCS to the number of CPUs available, as determined by runtime.NumCPU.
+### Use int keys instead of string keys for maps
+If the program relies heavily on maps, using int keys might be meaningful, if applicable. See also: Map Access Benchmark.
 
-### Running with different GOMAXPROCS
-
-```
-GOMAXPROCS=1 go run mergesort.go v1 & go tool trace v1.trace
-```
-
-![GOMAXPROCS=1](./images/gomaxprocs/gomaxprocs-1.png)
-
-```
-GOMAXPROCS=8 go run mergesort.go v1 & go tool trace v1.trace
-```
-
-![GOMAXPROCS=8](./images/gomaxprocs/gomaxprocs-8.png)
-
-```
-GOMAXPROCS=18 go run mergesort.go v1 & go tool trace v1.trace
-```
-
-![GOMAXPROCS=18](./images/gomaxprocs/gomaxprocs-18.png)
-
-The number is the max possible and it is not required that the Go runtime create as many logical processors as you have specified.  
-
-### Exercise
-```gocode/gomaxprocs```
-
-Run the following and see the differences in the trace.
-
-```
-GOMAXPROCS=1 go run mergesort.go v2 && go tool trace v2.trace
-GOMAXPROCS=8 go run mergesort.go v2 && go tool trace v2.trace
-GOMAXPROCS=18 go run mergesort.go v2 && go tool trace v2.trace
-
-GOMAXPROCS=1 go run mergesort.go v3 && go tool trace v3.trace
-GOMAXPROCS=8 go run mergesort.go v3 && go tool trace v3.trace
-GOMAXPROCS=18 go run mergesort.go v3 && go tool trace v3.trace
-```
-
-```Opt Tip: Do not assume that increasing the number of GOMAXPROCS always improves speed.```
-
-## GOGC
-
-The GOGC variable sets the initial garbage collection target percentage. A collection is triggered when the ratio of freshly allocated data to live data remaining after the previous collection reaches this percentage. The default is GOGC=100. Setting GOGC=off disables the garbage collector entirely. The runtime/debug package's SetGCPercent function allows changing this percentage at run time. 
-
-GOGC controls the aggressiveness of the garbage collector.
-
-Setting this value higher, say GOGC=200, will delay the start of a garbage collection cycle until the live heap has grown to 200% of the previous size. Setting the value lower, say GOGC=20 will cause the garbage collector to be triggered more often as less new data can be allocated on the heap before triggering a collection.
-
-With the introduction of the low latency collector in Go 1.5, phrases like “trigger a garbage collection cycle” become more fluid, but the underlying message that values of GOGC greater than 100 mean the garbage collector will run less often, and for values of GOGC less than 100, more often
-
-
-### Exercise
-```gocode/gogc```
-
-Run the following and see the differences in the trace for heap and GC.
-
-```
-GOGC=off go run mergesort.go v1 & go tool trace v1.trace
-GOGC=50 go run mergesort.go v1 & go tool trace v1.trace
-GOGC=100 go run mergesort.go v1 & go tool trace v1.trace
-GOGC=200 go run mergesort.go v1 & go tool trace v1.trace
-```
-
-GOGC=off
-![GOGC=off](./images/gogc/gogc-off.png)
-
-GOGC=50
-![GOGC=50](./images/gogc/gogc-50.png)
-
-GOGC=100
-![GOGC=100](./images/gogc/gogc-100.png)
-
-GOGC=200
-![GOGC=200](./images/gogc/gogc-200.png)
-
-#References
+# References
 * (https://www.dotconferences.com/2019/03/daniel-marti-optimizing-go-code-without-a-blindfold)[Daniel Marti's talk - Optimizing Go Code without a Blindfold]
 * (https://dave.cheney.net/high-performance-go-workshop/dotgo-paris.html)[dave cheney high performance workshop]
 * (https://github.com/davecheney/high-performance-go-workshop)[github - dave cheney high performance workshop]

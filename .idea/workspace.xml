@@ -2,10 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e384564d-110a-4bf3-81a5-c4db639dd051" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/code/gomaxprocs/mergesort.go" beforeDir="false" afterPath="$PROJECT_DIR$/code/gomaxprocs/mergesort.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/code/gomaxprocs/mergesort_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/code/gomaxprocs/mergesort_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/code/sync.pool/book1_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/code/sync.pool/book1_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/code/sync.pool/book2_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/code/sync.pool/book2_test.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/readme.md" beforeDir="false" afterPath="$PROJECT_DIR$/readme.md" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/.tmp/" />
@@ -32,8 +28,8 @@
         <entry file="file://$PROJECT_DIR$/readme.md">
           <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
             <state split_layout="SPLIT">
-              <first_editor relative-caret-position="-3150">
-                <caret line="29" column="52" selection-start-line="29" selection-start-column="52" selection-end-line="29" selection-end-column="52" />
+              <first_editor relative-caret-position="-3090">
+                <caret line="33" column="52" selection-start-line="33" selection-start-column="52" selection-end-line="33" selection-end-column="52" />
               </first_editor>
               <second_editor />
             </state>
@@ -137,6 +133,7 @@
   </component>
   <component name="PropertiesComponent">
     <property name="DefaultGoTemplateProperty" value="Go File" />
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
@@ -259,8 +256,8 @@
     <entry file="file://$PROJECT_DIR$/readme.md">
       <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
         <state split_layout="SPLIT">
-          <first_editor relative-caret-position="-3150">
-            <caret line="29" column="52" selection-start-line="29" selection-start-column="52" selection-end-line="29" selection-end-column="52" />
+          <first_editor relative-caret-position="-3090">
+            <caret line="33" column="52" selection-start-line="33" selection-start-column="52" selection-end-line="33" selection-end-column="52" />
           </first_editor>
           <second_editor />
         </state>
