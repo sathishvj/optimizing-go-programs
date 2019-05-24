@@ -546,6 +546,7 @@ func main() {
 
 ```
 $ go build -gcflags='-m -l -m' 1.go
+// returns nothing.
 ```
 
 ```
@@ -562,6 +563,7 @@ func main() {
 
 ```
 $ go build -gcflags='-m -l -m' 1.go
+// returns nothing.
 ```
 
 ```
