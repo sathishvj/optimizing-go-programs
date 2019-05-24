@@ -12,8 +12,8 @@
 	- [stack and heap](#stack-and-heap)
 	- [escape analysis](#escape-analysis)
 * concurrency
-	- [sync Pools](#sync-pools)
-	- [sync once and lazy initializations](#sync-once-for-lazy-initialization)
+	- [sync Pools](#syncpools)
+	- [sync once and lazy initializations](#synconce-for-lazy-initialization)
 * go slices
 	- how do slices work internally. allocation and reuse.
 * specific optimizations
