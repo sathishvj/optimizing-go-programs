@@ -280,7 +280,9 @@ The tracer is a powerful tool for debugging concurrency issues, e.g, contentions
 The tool really shines when you want to understand the behavior of a program over time and to know what each goroutine is doing when NOT running. Collecting traces may have some overhead and can generate a high amount of data to be inspected.
 
 ## GOMAXPROCS
+
 Discussion: for a program to be more efficient should you have more threads/goroutines or less?
+
 Discussion: goroutines are kinda sorta similar to threads.  So why don't we just use threads instead of goroutines?
 
 Threads typically take up more resources than goroutines - a minimum thread stack typically is upwards of 1MB.
