@@ -293,7 +293,7 @@ Discussion: for a program to be more efficient should you have more threads/goro
 Discussion: goroutines are kinda sorta similar to threads.  So why don't we just use threads instead of goroutines?
 
 Threads typically take up more resources than goroutines - a minimum thread stack typically is upwards of 1MB.
-A goroutine typically starts of at 2kh.  So, that's, at a very minimum, a reduction of 500x.  Anything else though?
+A goroutine typically starts of at 2kb.  So, that's, at a very minimum, a reduction of 500x.  Anything else though?
 
 Context switching in Linux is about 1000ns while in go it is about 200ns - https://eli.thegreenplace.net/2018/measuring-context-switching-and-memory-overheads-for-linux-threads/
 
@@ -320,7 +320,6 @@ runtime.NumCPU()= 8
 Why is it showing 8 for NumCPU for a quad-core machine? The Intel chips on my machine is hyperthreaded - for each processor core that is physically present, the operating system addresses two virtual (logical) cores and shares the workload between them when possible.
 
 ### What should be the value of GOMAXPROCS?
-Upto Go 1.4, GOMAXPROCS defaulted to 1 because the 
 
 The default setting of GOMAXPROCS in all Go releases [up to 1.4] is 1, because programs with frequent goroutine switches ran much slower when using multiple threads. It is much cheaper to switch between two goroutines in the same thread than to switch between two goroutines in different threads.
 
