@@ -1,3 +1,4 @@
 **/*.out
 **/*.prof
 **/*.test
+**/*.trace

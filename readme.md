@@ -275,6 +275,12 @@ func main() {
 go run mergesort.go v1 && go tool trace v1.trace
 ```
 
+### Tracing GC
+
+The trace tool gives you a very good view into when the GC kicks in, when it is run, and how you could potentially optimize for it.
+
+![Tracing GC](./images/tracing/tracing-gc.png)
+
 ### Tracing Conclusion
 The tracer is a powerful tool for debugging concurrency issues, e.g, contentions and logical races. But it does not solve all problems: it is not the best tool available to track down what piece of code is spending most CPU time or allocations. The go tool pprof is better suited for these use cases.
 
@@ -629,7 +635,6 @@ func Benchmark_f1(b *testing.B) {
 }
 
 func f1() {
-	s := &bytes.Buffer{}
 	s.Write([]byte("dirty"))
 
 	return
