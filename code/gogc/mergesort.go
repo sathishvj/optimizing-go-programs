@@ -1,9 +1,9 @@
 // ref: https://hackernoon.com/parallel-merge-sort-in-go-fe14c1bc006
 
-// GOGC=off go run mergesort.go v1 & go tool trace v1.trace
-// GOGC=50 go run mergesort.go v1 & go tool trace v1.trace
-// GOGC=100 go run mergesort.go v1 & go tool trace v1.trace
-// GOGC=200 go run mergesort.go v1 & go tool trace v1.trace
+// GOGC=off go run mergesort.go v1 && go tool trace v1.trace
+// GOGC=50 go run mergesort.go v1 && go tool trace v1.trace
+// GOGC=100 go run mergesort.go v1 && go tool trace v1.trace
+// GOGC=200 go run mergesort.go v1 && go tool trace v1.trace
 package main
 
 import (
