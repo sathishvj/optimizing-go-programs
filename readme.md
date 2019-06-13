@@ -23,12 +23,9 @@
 	- how do slices work internally. allocation and reuse.
 * [String Concatenation](#string-concatenation)
 * [Map Keys: int vs string](#map-keys-int-vs-string)
-* [File I/O](#file-i-o)
+* [File I/O](#file-io)
 * [Regexp Compilation](#regexp-compilation)
 * Performance Tuning Patterns
-
-TODO
-	- heavy work in mutexes (https://commandercoriander.net/blog/2018/04/10/dont-lock-around-io/)
 
 ## Testing
 
