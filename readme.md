@@ -1096,6 +1096,59 @@ I found that the map access time taken for longer key strings is longer.
 ``Opt tip: use int types instead of string types in maps.  If strings have to be used, use shorter strings.```
 
 
+## File I/O
+
+User buffered I/O, shortened to buffering or buffered I/O, refers to the technique of temporarily storing the results of an I/O operation in user-space before transmitting it to the kernel (in the case of writes) or before providing it to your process (in the case of reads). By so buffering the data, you can minimize the number of system calls and can block-align I/O operations, which may improve the performance of your application.
+
+For example, consider a process that writes one character at a time to a file. This is obviously inefficient: Each write operation corresponds to a write() system call, which means a trip into the kernel, a memory copy (of a single byte!), and a return to user-space, only to repeat the whole ordeal. Worse, filesystems and storage media work in terms of blocks; operations are fastest when aligned to integer multiples of those blocks. Misaligned operations, particularly very small ones, incur additional overhead.
+
+You want unbuffered output whenever you want to ensure that the output has been written before continuing. One example is standard error under a C runtime library - this is usually unbuffered by default. Since errors are (hopefully) infrequent, you want to know about them immediately. On the other hand, standard output is buffered simply because it's assumed there will be far more data going through it.
+
+In addition, it's not just system calls that are minimized but disk I/O as well. Let's say a program reads a file one byte at a time. With unbuffered input, you will go out to the (relatively very slow) disk for every byte even though it probably has to read in a whole block anyway (the disk hardware itself may have buffers but you're still going out to the disk controller which is going to be slower than in-memory access).  By buffering, the whole block is read in to the buffer at once then the individual bytes are delivered to you from the (in-memory, incredibly fast) buffer area.
+
+Buffering can take many forms, such as in the following example:
+
+```
++-------------------+-------------------+
+| Process A         | Process B         |
++-------------------+-------------------+
+| C runtime library | C runtime library | C RTL buffers
++-------------------+-------------------+
+|               OS caches               | Operating system buffers
++---------------------------------------+
+|      Disk controller hardware cache   | Disk hardware buffers
++---------------------------------------+
+|                   Disk                |
++---------------------------------------+
+```
+
+```
+f, _ := os.Create("/tmp/test.txt")
+for i := 0; i < 100000; i++ {
+	f.WriteString("some text!\n")
+}
+
+// vs
+
+f, _ := os.Create("/tmp/test.txt")
+w := bufio.NewWriter(f)
+for i := 0; i < 100000; i++ {
+	w.WriteString("some text!\n")
+}
+
+```
+
+```
+BenchmarkWriteFile-8           	       2	 882,154,299 ns/op
+BenchmarkWriteFileBuffered-8   	     300	   4,666,152 ns/op
+
+BenchmarkReadFile-8            	       3	 337,684,006 ns/op
+BenchmarkReadFileBuffered-8    	     200	   6,820,032 ns/op
+```
+
+``Opt tip: use buffered reads and writes.```
+
+
 ## Regexp Compilation
 
 Regular expressions are costly. Where possible, avoid them.  Where you have to have them, compile them once prior.  
