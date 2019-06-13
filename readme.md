@@ -1,5 +1,8 @@
 ## Contents
+
+## Go Tooling for Optimization
 * [Testing](#testing)
+* [Coverage](#coverage)
 * [Benchmarking](#benchmarking)
 * [Profiling](#profiling)
 * [Tracing](#tracing)
@@ -11,6 +14,8 @@
 * go memory analysis
 	- [stack and heap](#stack-and-heap)
 	- [escape analysis](#escape-analysis)
+
+## Go Techniques for Optimization
 * concurrency
 	- [sync Pools](#syncpools)
 	- [sync once and lazy initializations](#synconce-for-lazy-initialization)
@@ -26,7 +31,15 @@
 
 ## Testing
 
+*What do we need?* The ability to validate and verify our code (before customers test it).
+
 Unit testing is important enough to be a standard library.
+
+To write tests in Go:
+* the file name must end in ```_test.go```
+* the test function should start with ```Test```
+* the function signature is ```func Test_someFn(t *testing.T) { ... }```
+
 
 ```code/testing```
 
@@ -64,10 +77,36 @@ PASS
 Testing validates your code.  It checks for correctness.
 
 ```Opt tip: unit testing first, always.```
+```Opt tip: keep unit testing running and watching for file changes. (see, codeskyblue/fswatch)```
 
 p.s. When you run benchmarks, tests are run first.
 
+## Coverage
+
+*What do we need?* So we've written tests, but does it cover all our code?
+
+The Go tooling also gives you coverage results.  Less code is faster code.  Tested and covered code is more reliable code.
+
+```code/cover```
+
+```
+go test -covermode=count -coverprofile=count.out fmt
+go tool cover -html=count.out
+```
+
+Red areas have had zero coverage.  The brighter green sections have been covered more than the duller green sections.
+
+For current folder:
+```
+go test -covermode=count -coverprofile=count.out
+go tool cover -html=count.out
+```
+
+```Opt tip: Keep coverage as a check-in metric objective.  Or at least track coverage history in your build tool.```
+
 ## Benchmarking
+
+*What do we need?* The ability to instrument specific functions and see where it is spending time or allocating resources.
 
 Benchmarking checks for optimization.
 
@@ -93,25 +132,11 @@ PASS
 
 Benchmarking functions don't always care about the result (that is checked by unit testing).  However, the speed/allocations/blocking of a function could be dependent on the inputs - so test different inputs. 
 
-## Coverage
-
-The Go tooling also gives you automatic coverage results.  Less code is faster code.  Tested and covered code is more reliable code.
-
-```code/cover```
-
-```
-go test -covermode=count -coverprofile=count.out fmt
-go tool cover -html=count.out
-```
-
-For current folder:
-```
-go test -covermode=count -coverprofile=count.out
-go tool cover -html=count.out
-```
-
+```Opt tip: Map optimization goals to business SLOs and SLAs.```
 
 ## Profiling
+
+*What do we need?* The ability to instrument and analyze execution metrics.
 
 Package pprof writes runtime profiling data in the format expected by the pprof visualization tool.
 
@@ -176,6 +201,8 @@ See the net/http/pprof package for more details.
 ```
 
 ## M, P, G
+
+*Question*: How does concurrency work in Go?  How is it different from threads?
 
 OS Layout
 
@@ -368,6 +395,8 @@ GOMAXPROCS=18 go run mergesort.go v3 && go tool trace v3.trace
 
 ## GOGC
 
+*Question:* If GC is so important, can we adjust GC parameters?  Can we change the GC algorithm?
+
 The GOGC variable sets the initial garbage collection target percentage. A collection is triggered when the ratio of freshly allocated data to live data remaining after the previous collection reaches this percentage. The default is GOGC=100. Setting GOGC=off disables the garbage collector entirely. The runtime/debug package's SetGCPercent function allows changing this percentage at run time. 
 
 GOGC controls the aggressiveness of the garbage collector.
@@ -406,7 +435,7 @@ GOGC=200
 
 ## Stack and Heap
 
-Discussion: where is the stack memory shown in a trace diagram? 
+*Discussion:* where is the stack memory shown in a trace diagram? Is knowing stack and heap allocation important? How about in languages like Python, Java, JavaScript, etc.?
 
 ref: https://scvalex.net/posts/29/
 
@@ -605,6 +634,73 @@ However, if there are variables to be shared, it is appropriate for it to be on 
 See: https://segment.com/blog/allocation-efficiency-in-high-performance-go-services/
 See: http://www.agardner.me/golang/garbage/collection/gc/escape/analysis/2015/10/18/go-escape-analysis.html
 
+## Parallelize CPU work
+When the work can be parallelized without too much synchronization, taking advantage of all available cores can speed up execution linearly to the number of physical cores.
+
+```code/parallelize/rand_strings_test.go```
+
+```
+var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+
+func RandString(n int) string {
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = letters[rand.Intn(len(letters))]
+	}
+	time.Sleep(10 * time.Microsecond)
+	return string(b)
+}
+
+func RandString_Sequential() {
+	for i := 0; i < 1000; i++ {
+		s = append(s, RandString(100))
+	}
+}
+
+func RandString_Concurrent() {
+	for i := 0; i < 1000; i++ {
+		go func() {
+			s = append(s, RandString(100))
+		}()
+	}
+}
+
+```
+
+```
+$ go test -bench=Sequential rand_strings_test.go
+Benchmark_Concurrent-8   	     200	   26,936,125 ns/op
+```
+
+```
+$ go test -bench=Concurrent rand_strings_test.go
+Benchmark_Concurrent-8   	      50	    9,422,900 ns/op
+```
+
+Running the code concurrently has given you a 3x performance improvement.
+
+Now run it with the //time.Sleep commented out.
+
+```
+$ go test -bench=Sequential rand_strings_test.go
+Benchmark_Sequential-8   	     500	   3,865,565 ns/op
+```
+
+```
+ok  	command-line-arguments	2.354s
+$ go test -bench=Concurrent rand_strings_test.go
+Benchmark_Concurrent-8   	     200	   9,539,612 ns/op
+ok  	command-line-arguments	2.991s
+```
+
+Now we see a 3x drop in performance!
+
+Consider tight loops.  Tight loops do not allow the runtime scheduler to schedule goroutines efficiently.
+
+But consider contention.  If concurrent lines of work are stuck waiting for common resources, you're going to have worse performance.
+
+```Opt tip: Concurrency is good.  But have 'mechanical sympathy'.```
+
 ## sync.Pools
 Pool's purpose is to cache allocated but unused items for later reuse, relieving pressure on the garbage collector. That is, it makes it easy to build efficient, thread-safe free lists. However, it is not suitable for all free lists.
 
@@ -798,13 +894,130 @@ sys	0m0.209s
 
 ```Opt tip: Consider lazily loading your resources using sync.Once at time of first use.```
 
+## Arrays and Slices
+
+Discussion: what are the key characteristics of an array?
+
+In Go, the size of an array is a distinct part of an array.  An array of one size cannot be assigned to an array of another size.
+
+```
+var a [5]int
+var b [6]int
+b = a
+```
+
+```
+// compile error
+cannot use a (type [5]int) as type [6]int in assignment
+```
+
+In Go, arrays are immutable.  You cannot append to (or delete from) an array.  
+
+Slices are mutable.  
+They can also be assigned different size slices.  Depending on the lengths of the source and target, there could be different behaviors.
+
+Slices can be made from arrays.
+
+```
+var a [5]int
+s := a[0:3]
+s = a[:3]
+s = a[3:]
+```
+
+Slices point to an array.  Always.  Within that array, there is a beginning position and a count of contiguous items that the slice refers to.
+
+```
+a := [5]int{1, 2, 3, 4, 5}
+s := a[0:3]
+s[0] = 11
+fmt.Println(a, s)
+```
+
+```
+[11 2 3 4 5] 
+[11 2 3]
+```
+
+So are the addresses of the array and slice the same?
+```
+	fmt.Printf("%p %p\n", &a, &s)
+```
+
+```
+0xc0000181b0 0xc00000c060
+```
+
+The slice has its own data structure that points to the array.
+So then are their element addresses the same?
+
+```
+fmt.Printf("%p %p\n", &a[0], &s[0])
+```
+
+```
+0xc0000181b0 0xc0000181b0
+```
+
+Yes, they are.  A slice has no storage of its own; it merely points to the array.
+
+But why would it be designed that way?
+
+```
+a := [5]int{1, 2, 3, 4, 5}
+s := a[0:3]
+fmt.Println(a, s)
+
+s = append(s, 9)
+fmt.Println(a, s)
+
+s = append(s, 19)
+fmt.Println(a, s)
+```
+
+```
+[1 2 3 4 5] [1 2 3]
+[1 2 3 9 5] [1 2 3 9]
+[1 2 3 9 19] [1 2 3 9 19]
+```
+
+What happens when we breach the boundary?
+
+```
+s = append(s, 99)
+fmt.Println(a, s)
+```
+
+```
+[1 2 3 9 19] [1 2 3 9 19 99]
+```
+
+Once the boundary is breached, the array remains the same.  The slice is given new expanded memory elsewhere backed by a new array.
+
+Why would we do it this way?  
+Because, memory allocation are very costly.  Go allows you to pre-allocate memory to avoid runtime performance cost of repeatedly allocating new memory.  Repeated reallocation also adds significant GC pressure.
+
+You can pre-allocate the expected size (capacity) of the slice using make.
+
+```
+months := make([]int, 0, 12)
+months = append(months, 1)
+months = append(months, 7)
+```
+
+You can also pre-allocate the size of the slice after a slicing operation by providing a third parameter.
+
+```
+s := a[0:3:12]
+```
+
+```Opt tip: Pre-allocating slices to expected sizes can significantly increase performance.```
+
 ## Go Performance Patterns
 When application performance is a critical requirement, the use of built-in or third-party packages and methods should be considered carefully. The cases when a compiler can optimize code automatically are limited. The Go Performance Patterns are benchmark- and practice-based recommendations for choosing the most efficient package, method or implementation technique.
 
 Some points may not be applicable to a particular program; the actual performance optimization benefits depend almost entirely on the application logic and load.
 
-### Parallelize CPU work
-When the work can be parallelized without too much synchronization, taking advantage of all available cores can speed up execution linearly to the number of physical cores.
 
 ### Make multiple I/O operations asynchronous
 Network and file I/O (e.g. a database query) is the most common bottleneck in I/O-bound applications. Making independent I/O operations asynchronous, i.e. running in parallel, can improve downstream latency. Use sync.WaitGroup to synchronize multiple operations.
@@ -928,3 +1141,4 @@ If the program relies heavily on maps, using int keys might be meaningful, if ap
 * https://dave.cheney.net/2015/11/29/a-whirlwind-tour-of-gos-runtime-environment-variables
 * (https://www.youtube.com/watch?v=ZMZpH4yT7M0)[https://engineers.sg/video/understanding-allocations-the-stack-and-the-heap-gophercon-sg-2019--3371]
 * (https://blog.golang.org/ismmkeynote)[Getting to Go's Garbage Collector]
+* (https://talks.golang.org/2017/state-of-go.slide#34)[Go GC progress in tweets]
