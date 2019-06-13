@@ -26,7 +26,7 @@
 * [File I/O](#file-io)
 * [Regexp Compilation](#regexp-compilation)
 
-## [Go Performance Patterns](#go-performance-patterns)
+* [Go Performance Patterns](#go-performance-patterns)
 
 ## Testing
 
