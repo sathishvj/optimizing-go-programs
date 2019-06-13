@@ -1,6 +1,6 @@
 ## Contents
 
-## Go Tooling for Optimization
+## Go Tools for Optimization
 * [Testing](#testing)
 * [Coverage](#coverage)
 * [Benchmarking](#benchmarking)
@@ -25,7 +25,8 @@
 * [Map Keys: int vs string](#map-keys-int-vs-string)
 * [File I/O](#file-io)
 * [Regexp Compilation](#regexp-compilation)
-* Performance Tuning Patterns
+
+## [Go Performance Patterns](#go-performance-patterns)
 
 ## Testing
 
