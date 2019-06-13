@@ -900,6 +900,8 @@ Discussion: what are the key characteristics of an array?
 
 In Go, the size of an array is a distinct part of an array.  An array of one size cannot be assigned to an array of another size.
 
+```code/slices```
+
 ```
 var a [5]int
 var b [6]int
@@ -995,7 +997,7 @@ fmt.Println(a, s)
 Once the boundary is breached, the array remains the same.  The slice is given new expanded memory elsewhere backed by a new array.
 
 Why would we do it this way?  
-Because, memory allocation are very costly.  Go allows you to pre-allocate memory to avoid runtime performance cost of repeatedly allocating new memory.  Repeated reallocation also adds significant GC pressure.
+Because, memory allocation is very costly.  Go allows you to pre-allocate memory to avoid runtime performance cost of repeatedly allocating new memory.  Repeated reallocation also adds significant GC pressure.
 
 You can pre-allocate the expected size (capacity) of the slice using make.
 
@@ -1013,11 +1015,90 @@ s := a[0:3:12]
 
 ```Opt tip: Pre-allocating slices to expected sizes can significantly increase performance.```
 
+
+## String Concatenation
+
+Strings are like an array of characters.  They are immutable.  Concatenating strings with the + operator causes constant reallocation and GC pressure.
+
+There are two options in the std lib: bytes.Buffer and strings.Builder.  Which would you guess performs better?
+
+```
+for n := 0; n < b.N; n++ {
+		str += "x"
+		// vs 
+		buffer.WriteString("x")
+		// vs 
+		builder.WriteString("x")
+}
+```
+
+```
+BenchmarkConcatString-8    	10000000	       128 ns/op
+BenchmarkConcatBuffer-8    	200000000	         9.54 ns/op
+BenchmarkConcatBuilder-8   	1000000000	         2.63 ns/op
+```
+
+In earlier benchmarks I see on the net, both bytes.Buffer and strings.Builder performed approximately similar.  But looks like strings.Builder has been further optimized since then.
+
+```Opt tip: Use strings.Builder > bytes.Buffer > string concatenation.```
+
+
+## Map Keys: int vs string
+
+Which do you think would be faster?  
+Pretty obvious, I guess.
+
+```code/map-access```
+
+```
+key := strconv.Itoa(rand.Intn(NumItems))
+//vs
+key := rand.Intn(NumItems)
+ ```
+
+```
+BenchmarkMapStringKeys-8   	20000000	       109 ns/op
+BenchmarkMapIntKeys-8      	20000000	        53.5 ns/op
+```
+
+Will the time change if the string is longer?
+
+```
+key := strconv.Itoa(rand.Intn(NumItems))
+key += ` is the key value that is being used. `
+//vs
+key := rand.Intn(NumItems)
+
+```
+
+```
+BenchmarkMapStringKeys-8   	10000000	       120 ns/op
+BenchmarkMapIntKeys-8      	30000000	        56.9 ns/op
+```
+
+Apparently it does.
+
+
+```
+key := strconv.Itoa(rand.Intn(NumItems))
+key += ` is the key value that is being used and a shakespeare sonnet. ` + sonnet106
+//vs
+key := rand.Intn(NumItems)
+```
+
+```
+BenchmarkMapStringKeys-8   	10000000	       246 ns/op
+BenchmarkMapIntKeys-8      	30000000	        50.4 ns/op
+```
+
+I found that the map access time taken for longer key strings is longer.  
+
+``Opt tip: use int types instead of string types in maps.  If strings have to be used, use shorter strings.```
+
 ## Go Performance Patterns
 When application performance is a critical requirement, the use of built-in or third-party packages and methods should be considered carefully. The cases when a compiler can optimize code automatically are limited. The Go Performance Patterns are benchmark- and practice-based recommendations for choosing the most efficient package, method or implementation technique.
 
 Some points may not be applicable to a particular program; the actual performance optimization benefits depend almost entirely on the application logic and load.
-
 
 ### Make multiple I/O operations asynchronous
 Network and file I/O (e.g. a database query) is the most common bottleneck in I/O-bound applications. Making independent I/O operations asynchronous, i.e. running in parallel, can improve downstream latency. Use sync.WaitGroup to synchronize multiple operations.
@@ -1032,7 +1113,7 @@ Synchronization often leads to contention and race conditions. Avoiding mutexes 
 The use of full locks for read-heavy synchronized variables will unnecessarily make reading goroutines wait. Use read-only locks to avoid it.
 
 ### Use buffered I/O
-Disks operate in blocks of data. Accessing disk for every byte is inefficient; reading and writing bigger chunks of data greatly improves the speed. See also: File I/O Benchmark
+Disks operate in blocks of data. Accessing disk for every byte is inefficient; reading and writing bigger chunks of data greatly improves the speed. 
 
 ### Use StringBuffer or StringBuilder instead of += operator
 A new string is allocated on every assignment, which is inefficient and should be avoided. See also: String Concatenation Benchmark.
@@ -1044,7 +1125,7 @@ It is inefficient to compile the same regular expression before every matching. 
 Go manages dynamically growing slices intelligently; it allocates twice as much memory every time the current capacity is reached. During re-allocation, the underlying array is copied to a new location. To avoid copying the memory and occupying garbage collection, preallocate the slice fully whenever possible. See also: Slice Appending Benchmark.
 
 ### Use Protocol Buffers or MessagePack instead of JSON and Gob
-JSON and Gob use reflection, which is relatively slow due to the amount of work it does. Although Gob serialization and deserialization is comparably fast, though, and may be preferred as it does not require type generation. See also: Serialization Benchmark.
+JSON and Gob use reflection, which is relatively slow due to the amount of work it does. Although Gob serialization and deserialization is comparably fast, though, and may be preferred as it does not require type generation. 
 
 ### Use int keys instead of string keys for maps
 If the program relies heavily on maps, using int keys might be meaningful, if applicable. See also: Map Access Benchmark.
