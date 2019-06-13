@@ -16,18 +16,19 @@
 	- [escape analysis](#escape-analysis)
 
 ## Go Techniques for Optimization
-* concurrency
-	- [sync Pools](#syncpools)
-	- [sync once and lazy initializations](#synconce-for-lazy-initialization)
-* go slices
+* [Parallelize CPU Work](#parallelize-cpu-work)
+* [sync Pools](#syncpools)
+* [sync once and lazy initializations](#synconce-for-lazy-initialization)
+* [Arrays and Slices](#arrays-and-slices)
 	- how do slices work internally. allocation and reuse.
-* specific optimizations
-	- string vs buffer
-	- heavy work in mutexes (https://commandercoriander.net/blog/2018/04/10/dont-lock-around-io/)
-	- buffered vs unbuffered output
-	- use int keys instead of string keys
-
+* [String Concatenation](#string-concatenation)
+* [Map Keys: int vs string](#map-keys-int-vs-string)
+* [File I/O](#file-i-o)
+* [Regexp Compilation](#regexp-compilation)
 * Performance Tuning Patterns
+
+TODO
+	- heavy work in mutexes (https://commandercoriander.net/blog/2018/04/10/dont-lock-around-io/)
 
 ## Testing
 
@@ -1161,7 +1162,7 @@ for i:=0; i< b.N; i++ {
 
 // vs
 
-r, err := regexp.Compile(testRegexp)
+r, _ := regexp.Compile(testRegexp)
 for i:=0; i< b.N; i++ {
 	r.MatchString("jsmith@example.com")
 }
