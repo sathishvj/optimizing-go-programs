@@ -2,8 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e384564d-110a-4bf3-81a5-c4db639dd051" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/readme.md" beforeDir="false" afterPath="$PROJECT_DIR$/readme.md" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/.tmp/" />
@@ -30,8 +28,8 @@
         <entry file="file://$PROJECT_DIR$/readme.md">
           <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
             <state split_layout="SPLIT">
-              <first_editor relative-caret-position="959">
-                <caret line="1033" selection-start-line="1033" selection-end-line="1033" />
+              <first_editor relative-caret-position="595">
+                <caret line="1114" column="2" selection-start-line="1114" selection-start-column="2" selection-end-line="1114" selection-end-column="2" />
               </first_editor>
               <second_editor />
             </state>
@@ -172,12 +170,12 @@
       <workItem from="1558416965468" duration="168000" />
       <workItem from="1559711518145" duration="617000" />
       <workItem from="1560398083977" duration="890000" />
-      <workItem from="1560437429043" duration="635000" />
+      <workItem from="1560437429043" duration="1496000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="2310000" />
+    <option name="totallyTimeSpent" value="3171000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="23" width="1920" height="1177" extended-state="6" />
@@ -252,8 +250,8 @@
     <entry file="file://$PROJECT_DIR$/readme.md">
       <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
         <state split_layout="SPLIT">
-          <first_editor relative-caret-position="959">
-            <caret line="1033" selection-start-line="1033" selection-end-line="1033" />
+          <first_editor relative-caret-position="595">
+            <caret line="1114" column="2" selection-start-line="1114" selection-start-column="2" selection-end-line="1114" selection-end-column="2" />
           </first_editor>
           <second_editor />
         </state>

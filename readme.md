@@ -1024,11 +1024,11 @@ There are two options in the std lib: bytes.Buffer and strings.Builder.  Which w
 
 ```
 for n := 0; n < b.N; n++ {
-		str += "x"
-		// vs 
-		buffer.WriteString("x")
-		// vs 
-		builder.WriteString("x")
+	str += "x"
+	// vs 
+	buffer.WriteString("x")
+	// vs 
+	builder.WriteString("x")
 }
 ```
 
@@ -1094,6 +1094,32 @@ BenchmarkMapIntKeys-8      	30000000	        50.4 ns/op
 I found that the map access time taken for longer key strings is longer.  
 
 ``Opt tip: use int types instead of string types in maps.  If strings have to be used, use shorter strings.```
+
+
+## Regexp Compilation
+
+Regular expressions are costly. Where possible, avoid them.  Where you have to have them, compile them once prior.  
+Also consider using this with sync.Once.
+
+```
+for i:=0; i< b.N; i++ {
+	regexp.MatchString(testRegexp, "jsmith@example.com")
+}
+
+// vs
+
+r, err := regexp.Compile(testRegexp)
+for i:=0; i< b.N; i++ {
+	r.MatchString("jsmith@example.com")
+}
+```
+
+```
+BenchmarkMatchString-8           	  200000	      7195 ns/op
+BenchmarkMatchStringCompiled-8   	 2000000	       630 ns/op
+```
+
+```Opt tip: take pre-compiled options in regex, sql prepared statements, etc.```
 
 ## Go Performance Patterns
 When application performance is a critical requirement, the use of built-in or third-party packages and methods should be considered carefully. The cases when a compiler can optimize code automatically are limited. The Go Performance Patterns are benchmark- and practice-based recommendations for choosing the most efficient package, method or implementation technique.
