@@ -25,6 +25,7 @@
 * [Map Keys: int vs string](#map-keys-int-vs-string)
 * [File I/O](#file-io)
 * [Regexp Compilation](#regexp-compilation)
+* [Defer](#defer)
 
 * [Go Performance Patterns](#go-performance-patterns)
 
@@ -177,6 +178,7 @@ go test -bench=. -cpuprofile=cpu.pprof
 go tool pprof cpu.pprof
 
 go-torch --binaryname web.test -b cpu.pprof
+open torch.svg
 ```
 
 More recently (1.10?), pprof got its own UI.
@@ -1173,6 +1175,50 @@ BenchmarkMatchStringCompiled-8   	 2000000	       630 ns/op
 
 ```Opt tip: take pre-compiled options in regex, sql prepared statements, etc.```
 
+## Defer
+
+Defer does additional work for you and therefore it is not as fast as straight-line code.
+
+```code/defer```
+
+```
+func (t *T) CounterA() int64 {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	return t.n
+}
+
+func (t *T) CounterB() (count int64) {
+	t.mu.Lock()
+	count = t.n
+	t.mu.Unlock()
+	return
+}
+
+func (t *T) IncreaseA() {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	t.n++
+}
+
+func (t *T) IncreaseB() {
+	t.mu.Lock()
+	t.n++ // this line will not panic for sure
+	t.mu.Unlock()
+}
+```
+
+Up to now (Go 1.12), for the official Go compiler, deferred function calls will cause a few performance losses at run time.
+
+```
+Benchmark_CounterA-8    	30000000	        52.9 ns/op
+Benchmark_CounterB-8    	100000000	        18.9 ns/op
+Benchmark_IncreaseA-8   	30000000	        51.9 ns/op
+Benchmark_IncreaseB-8   	100000000	        19.3 ns/op
+```
+
+```Opt tip: where performance is a consideration and code is unlikely to do panic/recover, see if defers can be replaced.```
+
 ## Go Performance Patterns
 When application performance is a critical requirement, the use of built-in or third-party packages and methods should be considered carefully. The cases when a compiler can optimize code automatically are limited. The Go Performance Patterns are benchmark- and practice-based recommendations for choosing the most efficient package, method or implementation technique.
 
@@ -1301,3 +1347,21 @@ If the program relies heavily on maps, using int keys might be meaningful, if ap
 * (https://www.youtube.com/watch?v=ZMZpH4yT7M0)[https://engineers.sg/video/understanding-allocations-the-stack-and-the-heap-gophercon-sg-2019--3371]
 * (https://blog.golang.org/ismmkeynote)[Getting to Go's Garbage Collector]
 * (https://talks.golang.org/2017/state-of-go.slide#34)[Go GC progress in tweets]
+* https://go101.org/article/concurrent-atomic-operation.html
+* https://www.integralist.co.uk/posts/profiling-go/
+* https://medium.com/golangspec/sync-rwmutex-ca6c6c3208a0
+* https://rakyll.org/mutexprofile/
+* https://jvns.ca/blog/2017/09/24/profiling-go-with-pprof/
+* https://blog.gopheracademy.com/advent-2018/avoid-gc-overhead-large-heaps/ 
+* (https://blog.golang.org/ismmkeynote)[Journey of go's Garbage collector]
+* (https://go101.org/article/memory-layout.html)[Memory Layout and Type Alignment Guarantees]
+* https://dougrichardson.org/2016/01/23/go-memory-allocations.html
+* https://segment.com/blog/allocation-efficiency-in-high-performance-go-services/
+* https://stackimpact.com/docs/go-performance-tuning/
+* https://hackernoon.com/dancing-with-go-s-mutexes-92407ae927bf
+* (https://blog.jetbrains.com/go/2019/04/03/profiling-go-applications-and-tests/)[GoLand - Profiling Go Applications and Tests]
+* https://povilasv.me/go-memory-management/ 
+* (https://github.com/gperftools/gperftools)[gperftools - docs for various profilers]
+* https://software.intel.com/en-us/blogs/2014/05/10/debugging-performance-issues-in-go-programs
+* https://medium.com/@_orcaman/when-too-much-concurrency-slows-you-down-golang-9c144ca305a
+* (https://go101.org/article/defer-more.html)[defer more]
