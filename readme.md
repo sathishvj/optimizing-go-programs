@@ -29,6 +29,7 @@
 * [Regexp Compilation](#regexp-compilation)
 * [Defer](#defer)
 * [fmt vs strconv](#fmt-vs-strconv)
+* [Explicitly Set Derived Values](#explicitly-set-derived-values)
 
 * [Go Performance Patterns](#go-performance-patterns)
 
@@ -1608,6 +1609,35 @@ Benchmark_strconvFn-8  50000000	 31.2 ns/op	4 B/op	 1 allocs/op
 It can increase the number of allocations needed. Passing a non-pointer type as an interface{} usually causes heap allocations. [ref](https://stephen.sh/posts/quick-go-performance-improvements)
 
 ```Tip: consider using functions that take specific data types as opposed to an empty interface, e.g. strconv functions as opposed to fmt.Sprintf.```
+
+## Explicitly Set Derived Values
+
+Certain parts of the standard library or external libraries might derive information that is not explicitly set.  Using benchmarking, flame-graphs, etc., figure out whether explicitly setting values could avoid the process of deriving it.
+
+```
+// responsewriter/main_test.go
+func withoutSetHeader(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintln(w, "hello, stranger")
+}
+
+func withSetHeader(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/plain")
+	fmt.Fprintln(w, "hello, stranger")
+}
+```
+
+```
+$ go test -bench=.
+goos: darwin
+goarch: amd64
+Benchmark_withoutSetHeader-8   	 1000000  1664 ns/op
+Benchmark_withSetHeader-8      	 1000000  1183 ns/op
+```
+
+If the header is not set for "Content-Type", then the behaviour of the write (Fprintln) to the ResponseWriter is to parse the data to derive the content type.  By explicitly setting the Content type, we're able to increase the performance.
+
+```Tip: Look at implementation to see if otherwise derived values can be set in advance.```
+
 
 ## Go Performance Patterns
 When application performance is a critical requirement, the use of built-in or third-party packages and methods should be considered carefully. The cases when a compiler can optimize code automatically are limited. The Go Performance Patterns are benchmark- and practice-based recommendations for choosing the most efficient package, method or implementation technique.
