@@ -1417,7 +1417,7 @@ BenchmarkMapIntKeys-8      	30000000	        50.4 ns/op
 
 I found that the map access time taken for longer key strings is longer.  
 
-``Tip: use int types instead of string types in maps.  If strings have to be used, use shorter strings.```
+```Tip: use int types instead of string types in maps.  If strings have to be used, use shorter strings.```
 
 
 ## JSON Unmarshaling
