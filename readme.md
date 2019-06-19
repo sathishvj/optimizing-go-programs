@@ -135,6 +135,27 @@ Benchmarking functions don't always care about the result (that is checked by un
 
 ```Opt tip: Map optimization goals to business SLOs and SLAs.```
 
+### Benchcmp
+
+Use benchcmp to easily compare between benchmarks.
+
+```
+$ go test -run=NONE -bench=. ./... > old.txt
+// make changes
+$ go test -run=NONE -bench=. ./... > new.txt
+
+$ benchcmp old.txt new.txt
+
+benchmark           old ns/op     new ns/op     delta
+BenchmarkConcat     523           68.6          -86.88%
+
+benchmark           old allocs     new allocs     delta
+BenchmarkConcat     3              1              -66.67%
+
+benchmark           old bytes     new bytes     delta
+BenchmarkConcat     80            48            -40.00%
+```
+
 ## Profiling
 
 *What do we need?* The ability to instrument and analyze execution metrics.
@@ -998,6 +1019,8 @@ func i2(a, b, c []byte) {
 }
 ```
 
+```Opt tip: bce helps shave off ns. Document your bce hints code.```
+
 
 ## sync.Pools
 Pool's purpose is to cache allocated but unused items for later reuse, relieving pressure on the garbage collector. That is, it makes it easy to build efficient, thread-safe free lists. However, it is not suitable for all free lists.
@@ -1664,3 +1687,4 @@ If the program relies heavily on maps, using int keys might be meaningful, if ap
 * [defer more](https://go101.org/article/defer-more.html)
 * https://go101.org/article/bounds-check-elimination.html
 * [Agniva's slides from Golang Bangalore meetup](https://drive.google.com/file/d/1nm7QoZe047lfnLXmdKC0s8Ub7A8LzF56/view)
+* [JSON unmarshal vs decode benchmark](https://github.com/kpango/go-json-bench)
