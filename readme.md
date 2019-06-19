@@ -2,7 +2,7 @@
 
 This is a collation of tools and techniques that will help optimize Go programs.  It is divided into two parts - Tools and Techniques.  Tools look at the go command line tools that help you instrument your code.  Techniques look at a list of ideas that you could potentially use to gain performance.  
 
-At the end are also a large list of references of the posts that I went through to understand it myself.  I have personally worked on, reworked, tried, and tested all the code (from about April 2019 to June 2019 - so far).  However, as the large list of references show, I am indebted to others and I have liberally adopted and adapted their thoughts and, occasionally, their notes.
+At the end are also a large list of references of the posts that I went through to understand it myself.  I have personally worked on, reworked, tried, and tested all the code (from about April 2019 to June 2019 - so far).  However, as the large list of references show, I am indebted to others.  I have often liberally adopted and adapted their thoughts and, occasionally, their notes.
 
 ## Go Tools for Optimization
 * [Testing](#testing)
