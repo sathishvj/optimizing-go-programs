@@ -24,9 +24,11 @@
 	- how do slices work internally. allocation and reuse.
 * [String Concatenation](#string-concatenation)
 * [Map Keys: int vs string](#map-keys-int-vs-string)
+* [JSON Unmarshaling](#json-unmarshaling)
 * [File I/O](#file-io)
 * [Regexp Compilation](#regexp-compilation)
 * [Defer](#defer)
+* [fmt vs strconv](#fmt-vs-strconv)
 
 * [Go Performance Patterns](#go-performance-patterns)
 
@@ -77,8 +79,8 @@ PASS
 
 Testing validates your code.  It checks for correctness.
 
-```Opt tip: unit testing first, always.```
-```Opt tip: keep unit testing running and watching for file changes. (see, codeskyblue/fswatch)```
+```Tip: unit testing first, always.```
+```Tip: keep unit testing running and watching for file changes. (see, codeskyblue/fswatch)```
 
 p.s. When you run benchmarks, tests are run first.
 
@@ -103,7 +105,7 @@ go test -covermode=count -coverprofile=count.out
 go tool cover -html=count.out
 ```
 
-```Opt tip: Keep coverage as a check-in metric objective.  Or at least track coverage history in your build tool.```
+```Tip: Keep coverage as a check-in metric objective.  Or at least track coverage history in your build tool.```
 
 ## Benchmarking
 
@@ -133,7 +135,7 @@ PASS
 
 Benchmarking functions don't always care about the result (that is checked by unit testing).  However, the speed/allocations/blocking of a function could be dependent on the inputs - so test different inputs. 
 
-```Opt tip: Map optimization goals to business SLOs and SLAs.```
+```Tip: Map optimization goals to business SLOs and SLAs.```
 
 ### Benchcmp
 
@@ -652,7 +654,7 @@ To perform escape analysis, Go builds a graph of function calls at compile time,
 
 However, if there are variables to be shared, it is appropriate for it to be on the heap.
 
-```Opt tip: If you’ve profiled your program’s heap usage and need to reduce GC time, there may be some wins from moving frequently allocated variables off the heap. ```
+```Tip: If you’ve profiled your program’s heap usage and need to reduce GC time, there may be some wins from moving frequently allocated variables off the heap. ```
 
 See: https://segment.com/blog/allocation-efficiency-in-high-performance-go-services/
 See: http://www.agardner.me/golang/garbage/collection/gc/escape/analysis/2015/10/18/go-escape-analysis.html
@@ -722,7 +724,7 @@ Consider tight loops.  Tight loops do not allow the runtime scheduler to schedul
 
 But consider contention.  If concurrent lines of work are stuck waiting for common resources, you're going to have worse performance.
 
-```Opt tip: Concurrency is good.  But have 'mechanical sympathy'.```
+```Tip: Concurrency is good.  But have 'mechanical sympathy'.```
 
 
 ## Bounds Check Elimination
@@ -1019,7 +1021,7 @@ func i2(a, b, c []byte) {
 }
 ```
 
-```Opt tip: bce helps shave off ns. Document your bce hints code.```
+```Tip: bce helps shave off ns. Document your bce hints code.```
 
 
 ## sync.Pools
@@ -1103,7 +1105,7 @@ $ go test -bench=f2 -benchmem
 Benchmark_f2-8   	50000000	        38.2 ns/op	      14 B/op	       0 allocs/op
 ```
 
-```Opt tip: Use sync.Pool is reduced your memory allocation pressure.```
+```Tip: Use sync.Pool is reduced your memory allocation pressure.```
 
 ### Exercise: sync.Pool
 A type of data (book) needs to be written to a json file. An ISBN number is added to new book ({title, author}) and written out to a file.  Use sync.Pool to reduce allocations prior to writing.
@@ -1213,7 +1215,7 @@ user	0m0.392s
 sys	0m0.209s
 ```
 
-```Opt tip: Consider lazily loading your resources using sync.Once at time of first use.```
+```Tip: Consider lazily loading your resources using sync.Once at time of first use.```
 
 ## Arrays and Slices
 
@@ -1334,7 +1336,7 @@ You can also pre-allocate the size of the slice after a slicing operation by pro
 s := a[0:3:12]
 ```
 
-```Opt tip: Pre-allocating slices to expected sizes can significantly increase performance.```
+```Tip: Pre-allocating slices to expected sizes can significantly increase performance.```
 
 
 ## String Concatenation
@@ -1361,7 +1363,7 @@ BenchmarkConcatBuilder-8   	1000000000	         2.63 ns/op
 
 In earlier benchmarks I see on the net, both bytes.Buffer and strings.Builder performed approximately similar.  But looks like strings.Builder has been further optimized since then.
 
-```Opt tip: Use strings.Builder > bytes.Buffer > string concatenation.```
+```Tip: Use strings.Builder > bytes.Buffer > string concatenation.```
 
 
 ## Map Keys: int vs string
@@ -1414,7 +1416,48 @@ BenchmarkMapIntKeys-8      	30000000	        50.4 ns/op
 
 I found that the map access time taken for longer key strings is longer.  
 
-``Opt tip: use int types instead of string types in maps.  If strings have to be used, use shorter strings.```
+``Tip: use int types instead of string types in maps.  If strings have to be used, use shorter strings.```
+
+
+## JSON Unmarshaling
+
+JSON Unmarshaling uses reflection, which is not very efficient.  It is convenient and straightforward though. 
+
+easyjson is an external tool that can be used to generate code.  Generating code means that you don't need to write or maintain the code.  You will have more (generated) code at compile time, but your code performance could be higher.
+
+```
+//main.go
+
+//easyjson:json
+type JSONData struct {
+	Data []string
+}
+
+func unmarshaljsonFn() {
+	var j JSONData
+	json.Unmarshal([]byte(`{"Data" : ["One", "Two", "Three"]} `), &j)
+}
+
+func easyjsonFn() {
+	d := &JSONData{}
+	d.UnmarshalJSON([]byte(`{"Data" : ["One", "Two", "Three"]} `))
+}
+```
+
+```
+$ go get -u github.com/mailru/easyjson/...
+
+$ easyjson -all main.go
+// this generates a file called main_easyjson.go
+```
+
+```
+go test -bench=. -benchmem
+Benchmark_unmarshaljson-8  2000000	981 ns/op  344 B/op  9 allocs/op
+Benchmark_easyjson-8       5000000	350 ns/op  124 B/op	 5 allocs/op
+```
+
+```Tip: if data serialization/deserialization is common, see if you can avoid reflection and interfaces.  Generate code at build time instead to reduce performance cost at run time.```
 
 
 ## File I/O
@@ -1467,7 +1510,7 @@ BenchmarkReadFile-8            	       3	 337,684,006 ns/op
 BenchmarkReadFileBuffered-8    	     200	   6,820,032 ns/op
 ```
 
-``Opt tip: use buffered reads and writes.```
+``Tip: use buffered reads and writes.```
 
 
 ## Regexp Compilation
@@ -1493,7 +1536,7 @@ BenchmarkMatchString-8           	  200000	      7195 ns/op
 BenchmarkMatchStringCompiled-8   	 2000000	       630 ns/op
 ```
 
-```Opt tip: take pre-compiled options in regex, sql prepared statements, etc.```
+```Tip: take pre-compiled options in regex, sql prepared statements, etc.```
 
 ## Defer
 
@@ -1537,7 +1580,34 @@ Benchmark_IncreaseA-8   	30000000	        51.9 ns/op
 Benchmark_IncreaseB-8   	100000000	        19.3 ns/op
 ```
 
-```Opt tip: where performance is a consideration and code is unlikely to do panic/recover, see if defers can be replaced.```
+```Tip: where performance is a consideration and code is unlikely to do panic/recover, see if defers can be replaced.```
+
+## fmt vs strconv
+
+fmt takes all parameters as interface{}.  It is always faster to give more definite types that don't need to be reflected on or asserted.
+
+```
+// fmt/main_test.go
+func fmtFn(i int) string {
+	return fmt.Sprintf("%d", i)
+}
+
+func Benchmark_fmtFn(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		fmtFn(1234)
+	}
+}
+```
+
+```
+$ go test -bench=. -benchmem
+Benchmark_fmtFn-8      20000000	 100 ns/op	16 B/op	 2 allocs/op
+Benchmark_strconvFn-8  50000000	 31.2 ns/op	4 B/op	 1 allocs/op
+```
+
+It can increase the number of allocations needed. Passing a non-pointer type as an interface{} usually causes heap allocations. [ref](https://stephen.sh/posts/quick-go-performance-improvements)
+
+```Tip: consider using functions that take specific data types as opposed to an empty interface, e.g. strconv functions as opposed to fmt.Sprintf.```
 
 ## Go Performance Patterns
 When application performance is a critical requirement, the use of built-in or third-party packages and methods should be considered carefully. The cases when a compiler can optimize code automatically are limited. The Go Performance Patterns are benchmark- and practice-based recommendations for choosing the most efficient package, method or implementation technique.
@@ -1573,6 +1643,17 @@ JSON and Gob use reflection, which is relatively slow due to the amount of work 
 
 ### Use int keys instead of string keys for maps
 If the program relies heavily on maps, using int keys might be meaningful, if applicable. See also: Map Access Benchmark.
+
+### Use methods that allow you to pass byte slices (?)
+When using packages, look to use methods that allow you to pass a byte slice: these methods usually give you more control over allocation.
+
+time.Format vs. time.AppendFormat is a good example. time.Format returns a string. Under the hood, this allocates a new byte slice and calls time.AppendFormat on it. time.AppendFormat takes a byte buffer, writes the formatted representation of the time, and returns the extended byte slice. This is common in other packages in the standard library: see strconv.AppendFloat, or bytes.NewBuffer.
+
+Why does this give you increased performance? Well, you can now pass byte slices that you've obtained from your sync.Pool, instead of allocating a new buffer every time. Or you can increase the initial buffer size to a value that you know is more suited to your program, to reduce slice re-copying.
+
+## Avoid using structures containing pointers as map keys for large maps
+
+During a garbage collection, the runtime scans objects containing pointers, and chases them. If you have a very large map[string]int, the GC has to check every string within the map, every GC, as strings contain pointers. [ref](https://stephen.sh/posts/quick-go-performance-improvements)
 
 # References
 * [Daniel Marti's talk - Optimizing Go Code without a Blindfold](https://www.dotconferences.com/2019/03/daniel-marti-optimizing-go-code-without-a-blindfold)
@@ -1688,3 +1769,5 @@ If the program relies heavily on maps, using int keys might be meaningful, if ap
 * https://go101.org/article/bounds-check-elimination.html
 * [Agniva's slides from Golang Bangalore meetup](https://drive.google.com/file/d/1nm7QoZe047lfnLXmdKC0s8Ub7A8LzF56/view)
 * [JSON unmarshal vs decode benchmark](https://github.com/kpango/go-json-bench)
+* https://www.darkcoding.net/software/go-the-price-of-interface/
+* [Russ Cox - Go Data Structures: Interfaces](https://research.swtch.com/interfaces)
