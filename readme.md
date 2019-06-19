@@ -1663,3 +1663,4 @@ If the program relies heavily on maps, using int keys might be meaningful, if ap
 * https://medium.com/@_orcaman/when-too-much-concurrency-slows-you-down-golang-9c144ca305a
 * (https://go101.org/article/defer-more.html)[defer more]
 * https://go101.org/article/bounds-check-elimination.html
+* (https://drive.google.com/file/d/1nm7QoZe047lfnLXmdKC0s8Ub7A8LzF56/view)[Agniva's slides from Golang Bangalore meetup]
