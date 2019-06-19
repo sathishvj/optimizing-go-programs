@@ -892,7 +892,7 @@ When it is definite that the index will not receive a value outside of its size 
 
 ### Providing bce Hints
 
-Example 1
+*Example 1*
 
 ```
 // e.go
@@ -930,7 +930,7 @@ Having done the check once outside, we are able to eliminate the remaining check
 
 How about this one?  There are 4 bounds checks.  Can we reduce them?
 
-Example 2
+*Example 2*
 
 ```
 // g.go
@@ -952,7 +952,7 @@ func g2(b []byte, v uint32) {
 }
 ```
 
-Example 3
+*Example 3*
 
 ```
 // h.go
@@ -978,7 +978,7 @@ func h2(b []byte, n int) {
 }
 ```
 
-Example 4
+*Example 4*
 
 ```
 func i1(a, b, c []byte) {
