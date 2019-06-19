@@ -1552,15 +1552,15 @@ JSON and Gob use reflection, which is relatively slow due to the amount of work 
 If the program relies heavily on maps, using int keys might be meaningful, if applicable. See also: Map Access Benchmark.
 
 # References
-* (https://www.dotconferences.com/2019/03/daniel-marti-optimizing-go-code-without-a-blindfold)[Daniel Marti's talk - Optimizing Go Code without a Blindfold]
-* (https://dave.cheney.net/high-performance-go-workshop/dotgo-paris.html)[dave cheney high performance workshop]
-* (https://github.com/davecheney/high-performance-go-workshop)[github - dave cheney high performance workshop]
-* (https://commandercoriander.net/blog/2018/04/10/dont-lock-around-io/)[don't lock around io]
-* (https://blog.gopheracademy.com/advent-2017/go-execution-tracer/)[advent 2017 - go execution tracer]
-* (https://docs.google.com/document/u/1/d/1FP5apqzBgr7ahCCgFO-yoVhk4YZrNIDNf9RybngBc14/pub)[execution tracer design doc]
+* [Daniel Marti's talk - Optimizing Go Code without a Blindfold](https://www.dotconferences.com/2019/03/daniel-marti-optimizing-go-code-without-a-blindfold)
+* [dave cheney high performance workshop](https://dave.cheney.net/high-performance-go-workshop/dotgo-paris.html)
+* [github - dave cheney high performance workshop](https://github.com/davecheney/high-performance-go-workshop)
+* [don't lock around io](https://commandercoriander.net/blog/2018/04/10/dont-lock-around-io/)
+* [advent 2017 - go execution tracer](https://blog.gopheracademy.com/advent-2017/go-execution-tracer/)
+* [execution tracer design doc](https://docs.google.com/document/u/1/d/1FP5apqzBgr7ahCCgFO-yoVhk4YZrNIDNf9RybngBc14/pub)
 * https://www.alexedwards.net/blog/an-overview-of-go-tooling
-* (https://www.alexedwards.net/blog/configuring-sqldb)[configuring sqldb for better performance]
-* (https://www.alexedwards.net/blog/how-to-rate-limit-http-requests)[rate limit http requests]
+* [configuring sqldb for better performance](https://www.alexedwards.net/blog/configuring-sqldb)
+* [rate limit http requests](https://www.alexedwards.net/blog/how-to-rate-limit-http-requests)
 * https://www.alexedwards.net/blog/understanding-mutexes
 * https://stackimpact.com/docs/go-performance-tuning/
 * https://stackimpact.com/blog/practical-golang-benchmarks/
@@ -1577,14 +1577,14 @@ If the program relies heavily on maps, using int keys might be meaningful, if ap
 * https://www.quora.com/In-C-what-does-buffering-I-O-or-buffered-I-O-mean
 * https://stackoverflow.com/questions/1450551/buffered-vs-unbuffered-io
 * http://www.agardner.me/golang/garbage/collection/gc/escape/analysis/2015/10/18/go-escape-analysis.html
-* (https://docs.google.com/presentation/d/e/2PACX-1vTxoBN41dYFB8aV8c0SDET3B2htsAavXPAwR-CMyfT2LfARR2KjOt8EPIU1zn8ceSuxrL8BmkOqqL_c/pub?start=false&loop=false&delayms=3000&slide=id.g524654fd95_0_117)[Performance Optimization Sins - Aliaksandar Valialkin]
+* [Performance Optimization Sins - Aliaksandar Valialkin](https://docs.google.com/presentation/d/e/2PACX-1vTxoBN41dYFB8aV8c0SDET3B2htsAavXPAwR-CMyfT2LfARR2KjOt8EPIU1zn8ceSuxrL8BmkOqqL_c/pub?start=false&loop=false&delayms=3000&slide=id.g524654fd95_0_117)
 * https://blog.gopheracademy.com/advent-2018/postmortem-debugging-delve/
 * https://github.com/golang/go/wiki/DesignDocuments
-* (https://docs.google.com/document/d/1nr-TQHw_er6GOQRsF6T43GGhFDelrAP0NqSS_00RgZQ/edit)[Go execution modes]
+* [Go execution modes](https://docs.google.com/document/d/1nr-TQHw_er6GOQRsF6T43GGhFDelrAP0NqSS_00RgZQ/edit)
 * https://rakyll.org/profiler-labels/
 * https://rakyll.org/pprof-ui/
 * https://medium.com/@blanchon.vincent/go-should-i-use-a-pointer-instead-of-a-copy-of-my-struct-44b43b104963
-* (https://www.youtube.com/watch?v=b0o-xeEoug0)[Performance tuning Go in GCP]
+* [Performance tuning Go in GCP](https://www.youtube.com/watch?v=b0o-xeEoug0)
 * https://medium.com/observability/want-to-debug-latency-7aa48ecbe8f7
 * https://medium.com/dm03514-tech-blog/sre-debugging-simple-memory-leaks-in-go-e0a9e6d63d4d
 * https://www.ardanlabs.com/blog/2013/07/understanding-type-in-go.html
@@ -1593,14 +1593,14 @@ If the program relies heavily on maps, using int keys might be meaningful, if ap
 * https://go101.org/article/memory-layout.html
 * https://dave.cheney.net/2015/10/09/padding-is-hard
 * http://www.catb.org/esr/structure-packing/
-* (https://scvalex.net/posts/29/)[Escape Analysis in Go]
+* [Escape Analysis in Go](https://scvalex.net/posts/29/)
 * https://www.ardanlabs.com/blog/2018/01/escape-analysis-flaws.html
 * https://www.ardanlabs.com/blog/2017/05/language-mechanics-on-stacks-and-pointers.html
 * https://segment.com/blog/allocation-efficiency-in-high-performance-go-services/
 * https://godoc.org/golang.org/x/perf/cmd/benchstat
 * https://www.dotconferences.com/2019/03/daniel-marti-optimizing-go-code-without-a-blindfold
 * https://www.youtube.com/watch?v=jiXnzkAzy30
-* (https://gist.github.com/arsham/bbc93990d8e5c9b54128a3d88901ab90)[go cpu mem profiling benchmarks gist]
+* [go cpu mem profiling benchmarks gist](https://gist.github.com/arsham/bbc93990d8e5c9b54128a3d88901ab90)
 * https://hashrocket.com/blog/posts/go-performance-observations
 * https://www.ardanlabs.com/blog/2017/05/language-mechanics-on-escape-analysis.html
 * https://dave.cheney.net/2014/06/07/five-things-that-make-go-fast 
@@ -1608,7 +1608,7 @@ If the program relies heavily on maps, using int keys might be meaningful, if ap
 * https://stackoverflow.com/questions/31496804/how-to-get-the-size-of-struct-and-its-contents-in-bytes-in-golang?rq=1
 * https://github.com/campoy/go-tooling-workshop/tree/master/3-dynamic-analysis
 * https://blog.usejournal.com/why-you-should-like-sync-pool-2c7960c023ba
-* (https://rakyll.org/scheduler/)[work stealing scheduler]
+* [work stealing scheduler](https://rakyll.org/scheduler/)
 * https://morsmachine.dk/go-scheduler
 * https://www.ardanlabs.com/blog/2018/08/scheduling-in-go-part1.html
 * https://www.ardanlabs.com/blog/2018/08/scheduling-in-go-part2.html
@@ -1639,28 +1639,28 @@ If the program relies heavily on maps, using int keys might be meaningful, if ap
 * https://blog.cloudflare.com/go-dont-collect-my-garbage/
 * https://syslog.ravelin.com/further-dangers-of-large-heaps-in-go-7a267b57d487
 * https://www.akshaydeo.com/blog/2017/12/23/How-did-I-improve-latency-by-700-percent-using-syncPool/
-* (https://docs.google.com/document/d/1At2Ls5_fhJQ59kDK2DFVhFu3g5mATSXqqV5QrxinasI/edit)[Go 1.5 GOMAXPROCS default document]
+* [Go 1.5 GOMAXPROCS default document](https://docs.google.com/document/d/1At2Ls5_fhJQ59kDK2DFVhFu3g5mATSXqqV5QrxinasI/edit)
 * https://dave.cheney.net/2015/11/29/a-whirlwind-tour-of-gos-runtime-environment-variables
-* (https://www.youtube.com/watch?v=ZMZpH4yT7M0)[https://engineers.sg/video/understanding-allocations-the-stack-and-the-heap-gophercon-sg-2019--3371]
-* (https://blog.golang.org/ismmkeynote)[Getting to Go's Garbage Collector]
-* (https://talks.golang.org/2017/state-of-go.slide#34)[Go GC progress in tweets]
+* [https://engineers.sg/video/understanding-allocations-the-stack-and-the-heap-gophercon-sg-2019--3371](https://www.youtube.com/watch?v=ZMZpH4yT7M0)
+* [Getting to Go's Garbage Collector](https://blog.golang.org/ismmkeynote)
+* [Go GC progress in tweets](https://talks.golang.org/2017/state-of-go.slide#34)
 * https://go101.org/article/concurrent-atomic-operation.html
 * https://www.integralist.co.uk/posts/profiling-go/
 * https://medium.com/golangspec/sync-rwmutex-ca6c6c3208a0
 * https://rakyll.org/mutexprofile/
 * https://jvns.ca/blog/2017/09/24/profiling-go-with-pprof/
 * https://blog.gopheracademy.com/advent-2018/avoid-gc-overhead-large-heaps/ 
-* (https://blog.golang.org/ismmkeynote)[Journey of go's Garbage collector]
-* (https://go101.org/article/memory-layout.html)[Memory Layout and Type Alignment Guarantees]
+* [Journey of go's Garbage collector](https://blog.golang.org/ismmkeynote)
+* [Memory Layout and Type Alignment Guarantees](https://go101.org/article/memory-layout.html)
 * https://dougrichardson.org/2016/01/23/go-memory-allocations.html
 * https://segment.com/blog/allocation-efficiency-in-high-performance-go-services/
 * https://stackimpact.com/docs/go-performance-tuning/
 * https://hackernoon.com/dancing-with-go-s-mutexes-92407ae927bf
-* (https://blog.jetbrains.com/go/2019/04/03/profiling-go-applications-and-tests/)[GoLand - Profiling Go Applications and Tests]
+* [GoLand - Profiling Go Applications and Tests](https://blog.jetbrains.com/go/2019/04/03/profiling-go-applications-and-tests/)
 * https://povilasv.me/go-memory-management/ 
-* (https://github.com/gperftools/gperftools)[gperftools - docs for various profilers]
+* [gperftools - docs for various profilers](https://github.com/gperftools/gperftools)
 * https://software.intel.com/en-us/blogs/2014/05/10/debugging-performance-issues-in-go-programs
 * https://medium.com/@_orcaman/when-too-much-concurrency-slows-you-down-golang-9c144ca305a
-* (https://go101.org/article/defer-more.html)[defer more]
+* [defer more](https://go101.org/article/defer-more.html)
 * https://go101.org/article/bounds-check-elimination.html
 * [Agniva's slides from Golang Bangalore meetup](https://drive.google.com/file/d/1nm7QoZe047lfnLXmdKC0s8Ub7A8LzF56/view)
