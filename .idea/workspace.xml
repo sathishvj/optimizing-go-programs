@@ -26,8 +26,8 @@
         <entry file="file://$PROJECT_DIR$/readme.md">
           <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
             <state split_layout="SPLIT">
-              <first_editor relative-caret-position="595">
-                <caret line="1166" column="2" selection-start-line="1166" selection-start-column="2" selection-end-line="1166" selection-end-column="2" />
+              <first_editor relative-caret-position="6145">
+                <caret line="1536" column="2" selection-start-line="1536" selection-start-column="2" selection-end-line="1536" selection-end-column="2" />
               </first_editor>
               <second_editor />
             </state>
@@ -84,17 +84,17 @@
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="6">
-    <option name="y" value="23" />
+  <component name="ProjectFrameBounds">
+    <option name="x" value="20" />
+    <option name="y" value="80" />
     <option name="width" value="1920" />
-    <option name="height" value="1001" />
+    <option name="height" value="1177" />
   </component>
   <component name="ProjectView">
     <navigator proportions="" version="1">
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -123,6 +123,7 @@
           <select />
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -169,14 +170,15 @@
       <workItem from="1559711518145" duration="617000" />
       <workItem from="1560398083977" duration="890000" />
       <workItem from="1560437429043" duration="1764000" />
+      <workItem from="1561120064798" duration="23000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="3439000" />
+    <option name="totallyTimeSpent" value="3462000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="23" width="1920" height="1177" extended-state="6" />
+    <frame x="20" y="80" width="1920" height="1177" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.12532912" />
@@ -248,8 +250,8 @@
     <entry file="file://$PROJECT_DIR$/readme.md">
       <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
         <state split_layout="SPLIT">
-          <first_editor relative-caret-position="595">
-            <caret line="1166" column="2" selection-start-line="1166" selection-start-column="2" selection-end-line="1166" selection-end-column="2" />
+          <first_editor relative-caret-position="6145">
+            <caret line="1536" column="2" selection-start-line="1536" selection-start-column="2" selection-end-line="1536" selection-end-column="2" />
           </first_editor>
           <second_editor />
         </state>
