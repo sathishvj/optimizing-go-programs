@@ -1844,3 +1844,4 @@ During a garbage collection, the runtime scans objects containing pointers, and 
 * [Russ Cox - Go Data Structures: Interfaces](https://research.swtch.com/interfaces)
 * https://github.com/golang/go/wiki/CompilerOptimizations
 * https://dave.cheney.net/2014/06/07/five-things-that-make-go-fast
+* [Carmen Andoh - The Why of Go](https://www.youtube.com/watch?v=bmZNaUcwBt4)
