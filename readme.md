@@ -702,6 +702,14 @@ $ go build -gcflags="-m" inline.go
 
 
 ## Parallelize CPU work
+
+### Queueing theory
+Ref: [What happens when you add another teller? - by John D. Cook](https://www.johndcook.com/blog/2008/10/21/what-happens-when-you-add-a-new-teller/)
+
+"Suppose a small bank has only one teller. Customers take an average of 10 minutes to serve and they arrive at the rate of 5.8 per hour. What will the expected waiting time be? What happens if you add another teller?
+
+We assume customer arrivals and customer service times are random. With only one teller, customers will have to wait nearly five hours on average before they are served. But if you add a second teller, the average waiting time is not just cut in half; it goes down to about 3 minutes. The waiting time is reduced by a factor of 93x."
+
 When the work can be parallelized without too much synchronization, taking advantage of all available cores can speed up execution linearly to the number of physical cores.
 
 ```code/parallelize/rand_strings_test.go```
